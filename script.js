@@ -30,6 +30,19 @@
 
   const uid = (prefix) => `${prefix}-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
 
+  /**
+   * Product branding — the single source of truth for the wordmark.
+   * applyBrand() re-asserts it on every load so a cached copy of an older
+   * index.html can never leave stale branding on screen.
+   */
+  const BRAND = { name: 'Meeting', suffix: '360', full: 'Meeting 360' };
+
+  function applyBrand() {
+    const mark = document.querySelector('.brand__text');
+    if (mark) mark.innerHTML = `${BRAND.name}<span>${BRAND.suffix}</span>`;
+    if (document.title !== BRAND.full) document.title = BRAND.full;
+  }
+
   /** Workspace currency symbol — used by every amount rendered in the UI. */
   const CURRENCY = '₹';
   const money = (n) => CURRENCY + Number(n || 0).toLocaleString('en-US', { maximumFractionDigits: 0 });
@@ -155,12 +168,13 @@
   const MEETING_TYPES = ['Discovery', 'Product Demo', 'Quarterly Review', 'Support Review', 'Onboarding', 'Internal Sync', 'Follow-up Call'];
   const LOCATIONS = ['Video call', 'On-site', 'Phone'];
 
+  /** The organizer roster — the single source of truth for who runs meetings. */
   const TEAM = [
-    { id: 'u-1', name: 'Adrian Cole', role: 'Meeting Owner', permission: 'Admin', status: 'Online' },
-    { id: 'u-2', name: 'Maya Iqbal', role: 'Customer Success', permission: 'Manager', status: 'Online' },
-    { id: 'u-3', name: 'Tomas Vega', role: 'Solutions Engineer', permission: 'Member', status: 'In a meeting' },
-    { id: 'u-4', name: 'Sara Lindqvist', role: 'Support Lead', permission: 'Member', status: 'Away' },
-    { id: 'u-5', name: 'Daniel Okafor', role: 'Revenue Operations', permission: 'Viewer', status: 'Offline' }
+    { id: 'u-1', name: 'Adrian Cole', role: 'Administrator', department: 'Revenue', email: 'adrian.cole@meeting360.io', phone: '(020) 7946-0011', permission: 'Admin', status: 'Online' },
+    { id: 'u-2', name: 'Maya Iqbal', role: 'Project Manager', department: 'Customer Success', email: 'maya.iqbal@meeting360.io', phone: '(020) 7946-0022', permission: 'Manager', status: 'Online' },
+    { id: 'u-3', name: 'Tomas Vega', role: 'Solutions Engineer', department: 'Solutions', email: 'tomas.vega@meeting360.io', phone: '(020) 7946-0033', permission: 'Member', status: 'In a meeting' },
+    { id: 'u-4', name: 'Sara Lindqvist', role: 'Support Lead', department: 'Support', email: 'sara.lindqvist@meeting360.io', phone: '(020) 7946-0044', permission: 'Member', status: 'Away' },
+    { id: 'u-5', name: 'Daniel Okafor', role: 'Revenue Operations', department: 'Operations', email: 'daniel.okafor@meeting360.io', phone: '(020) 7946-0055', permission: 'Viewer', status: 'Offline' }
   ];
 
   const TITLE_BANK = {
@@ -328,6 +342,7 @@
       const meeting = {
         id: `mt-${String(++n).padStart(3, '0')}`,
         title, type, date, time, duration, status, organizer,
+        organizerId: (TEAM.find((u) => u.name === organizer) || TEAM[0]).id,
         location: pick(rnd, LOCATIONS), contactId: contact.id,
         participants, agenda,
         summary: done ? pick(rnd, SUMMARY_BANK) : '',
@@ -409,7 +424,7 @@
     const ws = seedWorkspace();
     return {
       version: 1,
-      admin: { name: 'Adrian Cole', email: 'adrian.cole@meeting360.io', role: 'Administrator', initials: 'AC', avatar: 1 },
+      admin: { teamId: 'u-1', name: 'Adrian Cole', email: 'adrian.cole@meeting360.io', role: 'Administrator', initials: 'AC', avatar: 1 },
       settings: {
         density: 'comfortable', animations: true, landing: 'dashboard',
         defaultDuration: 30, defaultType: 'Discovery', defaultLocation: 'Video call',
@@ -500,6 +515,76 @@
   const meetingById = (id) => findRecord('meetings', id);
   const recordsForMeeting = (key, meetingId) => allRecords(key).filter((r) => r.meetingId === meetingId);
 
+  /* ---- Organizer roster (single source of truth, shared with the admin) ---- */
+  const teamById = (id) => DB.team.find((u) => u.id === id) || null;
+  const teamByName = (name) => DB.team.find((u) => u.name === name) || null;
+  const organizerOf = (m) => teamById(m.organizerId) || teamByName(m.organizer) || null;
+  const teamSelectOptions = () => DB.team.map((u) => ({ value: u.id, label: `${u.name} — ${u.role}` }));
+
+  function organizerStats(id) {
+    const mine = meetings().filter((m) => m.organizerId === id);
+    const done = mine.filter(isDone);
+    return {
+      organised: mine.length,
+      completed: done.length,
+      upcoming: mine.filter((m) => isFuture(m) && m.status !== 'Cancelled').length,
+      hours: Math.round(sum(done, (m) => m.duration) / 60),
+      actionItems: allRecords('tasks').filter((t) => t.owner === (teamById(id) || {}).name && t.status !== 'Completed').length
+    };
+  }
+
+  /** Keep the signed-in admin and their roster entry as one identity. */
+  function syncAdminToTeam() {
+    const u = teamById(DB.admin.teamId);
+    if (!u) return;
+    const oldName = u.name;
+    u.name = DB.admin.name;
+    u.role = DB.admin.role;
+    u.email = DB.admin.email;
+    if (oldName !== u.name) {
+      // Re-point every denormalised name so nothing keeps the stale one.
+      meetings().forEach((m) => { if (m.organizerId === u.id) m.organizer = u.name; });
+      ['tasks', 'followups', 'calls'].forEach((key) => {
+        allRecords(key).forEach((r) => { if (r.owner === oldName) r.owner = u.name; });
+      });
+      allRecords('notes').forEach((r) => { if (r.author === oldName) r.author = u.name; });
+      DB.feed.forEach((p) => { if (p.author === oldName) p.author = u.name; });
+    }
+  }
+
+  /**
+   * Backfills the meeting → organizer relation for workspaces saved before
+   * organizers became real records. Idempotent, so it can run on every load.
+   */
+  function migrateRelations() {
+    const fallback = ['Revenue', 'Customer Success', 'Solutions', 'Support', 'Operations'];
+    DB.team.forEach((u, i) => {
+      // Refresh the roster profile fields from the canonical list; permission and
+      // status stay as the workspace set them.
+      const seed = TEAM.find((t) => t.id === u.id);
+      if (seed) {
+        u.role = seed.role;
+        u.department = seed.department;
+        u.email = seed.email;
+        u.phone = seed.phone;
+      }
+      if (!u.email) u.email = u.name.toLowerCase().replace(/\s+/g, '.') + '@meeting360.io';
+      if (!u.department) u.department = fallback[i % fallback.length];
+    });
+    if (!DB.admin.teamId) {
+      const match = teamByName(DB.admin.name) || DB.team[0];
+      DB.admin.teamId = match ? match.id : null;
+    }
+    meetings().forEach((m) => {
+      if (!m.organizerId) {
+        const u = teamByName(m.organizer) || DB.team[0];
+        m.organizerId = u ? u.id : null;
+      }
+      const u = teamById(m.organizerId);
+      if (u) m.organizer = u.name;
+    });
+  }
+
   /* ======================================================================
      04. MODULE REGISTRY
      ====================================================================== */
@@ -530,7 +615,8 @@
       make: () => ({
         title: '', type: DB.settings.defaultType, date: daysFromNow(1), time: '10:00',
         duration: DB.settings.defaultDuration, location: DB.settings.defaultLocation,
-        status: 'Scheduled', organizer: DB.admin.name, contactId: DB.activeContactId,
+        status: 'Scheduled', organizerId: DB.admin.teamId || (DB.team[0] || {}).id,
+        organizer: DB.admin.name, contactId: DB.activeContactId,
         agendaText: '', summary: ''
       }),
       toggle: (r) => { r.status = r.status === 'Completed' ? 'Confirmed' : 'Completed'; },
@@ -543,7 +629,7 @@
         { name: 'duration', label: 'Duration (minutes)', type: 'number', min: 5, max: 600 },
         { name: 'location', label: 'Location', type: 'select', options: LOCATIONS },
         { name: 'status', label: 'Status', type: 'select', options: MEETING_STATUSES },
-        { name: 'organizer', label: 'Organizer', type: 'select', options: teamOptions() },
+        { name: 'organizerId', label: 'Organizer', type: 'select', options: teamSelectOptions() },
         { name: 'agendaText', label: 'Agenda — one topic per line', type: 'textarea', full: true,
           placeholder: 'Adoption review\nOpen issues\nNext steps' },
         { name: 'summary', label: 'Discussion summary', type: 'textarea', full: true }
@@ -558,6 +644,9 @@
             })
           : (existing ? existing.agenda : []);
         delete values.agendaText;
+        // Store the organizer relation, and mirror the name for display/grouping.
+        const u = teamById(values.organizerId);
+        if (u) values.organizer = u.name;
         return values;
       },
       toForm: (r) => Object.assign(clone(r), {
@@ -1860,6 +1949,8 @@
   const MTABS = {
     overview: (m) => {
       const c = contactById(m.contactId);
+      const u = organizerOf(m);
+      const stats = u ? organizerStats(u.id) : null;
       return `
         <p class="subhead">Meeting overview</p>
         <div class="fields">
@@ -1869,9 +1960,40 @@
           ${field('Time', `${fmtTime(m.time)} · ${fmtDuration(m.duration)}`)}
           ${field('Location', m.location)}
           ${field('Status', m.status)}
-          ${field('Organizer', m.organizer)}
-          ${field('Customer', c ? `${fullName(c)} — ${c.accountName}` : '')}
         </div>
+
+        <p class="subhead">Customer</p>
+        ${c ? `
+          <article class="rowcard">
+            <span class="avatar avatar--md ${avatarClass(c.id)}">${esc(initialsOf(c.firstName, c.lastName))}</span>
+            <div class="rowcard__body">
+              <p class="rowcard__title">${esc(fullName(c))}</p>
+              <p class="rowcard__meta">${esc(c.jobTitle || '—')} · ${esc(c.accountName || 'No company')}</p>
+              <p class="rowcard__meta">${icon('mail', 'ico--xs')} <a href="mailto:${esc(c.email)}">${esc(c.email)}</a>
+                ${c.mobile || c.officePhone ? ` · ${icon('phone', 'ico--xs')} <a href="${esc(telHref(c.mobile || c.officePhone))}">${esc(c.mobile || c.officePhone)}</a>` : ''}</p>
+            </div>
+            <div class="rowcard__side">
+              <button class="btn btn--sm btn--soft" type="button" data-act="open-contact" data-id="${esc(c.id)}">Open Contact 360</button>
+            </div>
+          </article>`
+          : '<p class="empty-note">No customer is linked to this meeting — use Edit to attach one.</p>'}
+
+        <p class="subhead">Organizer</p>
+        ${u ? `
+          <article class="rowcard">
+            <span class="avatar avatar--md ${avatarClass(u.id)}">${esc(initialsName(u.name))}</span>
+            <div class="rowcard__body">
+              <p class="rowcard__title">${esc(u.name)}</p>
+              <p class="rowcard__meta">${esc(u.role)} · ${esc(u.department)}</p>
+              <p class="rowcard__meta">${icon('mail', 'ico--xs')} <a href="mailto:${esc(u.email)}">${esc(u.email)}</a>
+                ${u.phone ? ` · ${icon('phone', 'ico--xs')} <a href="${esc(telHref(u.phone))}">${esc(u.phone)}</a>` : ''}</p>
+            </div>
+            <div class="rowcard__side">
+              <span class="pill pill--info">${stats.organised} meetings organised</span>
+              <button class="btn btn--sm btn--soft" type="button" data-act="organizer" data-id="${esc(u.id)}">View profile</button>
+            </div>
+          </article>`
+          : '<p class="empty-note">No organizer assigned — use Edit to set one.</p>'}
 
         <p class="subhead">Agenda
           <button class="btn btn--sm btn--soft" type="button" data-act="edit-agenda" data-id="${esc(m.id)}">${icon('edit', 'ico--xs')} Edit</button>
@@ -2960,15 +3082,21 @@
           <div class="card pad">
             <p class="subhead">Organizer leaderboard</p>
             <div class="stack">
-              ${Object.keys(byOwner).sort((a, b) => byOwner[b] - byOwner[a]).map((o, i) => `
+              ${Object.keys(byOwner).sort((a, b) => byOwner[b] - byOwner[a]).map((o, i) => {
+                const u = teamByName(o);
+                return `
                 <article class="rowcard">
-                  <span class="avatar avatar--sm ${avatarClass(o)}">${esc(initialsName(o))}</span>
+                  <span class="avatar avatar--sm ${avatarClass(u ? u.id : o)}">${esc(initialsName(o))}</span>
                   <div class="rowcard__body">
                     <p class="rowcard__title">${esc(o)}</p>
-                    <p class="rowcard__meta">${byOwner[o]} meetings organised</p>
+                    <p class="rowcard__meta">${u ? esc(u.role) + ' · ' : ''}${byOwner[o]} meetings organised</p>
                   </div>
-                  <div class="rowcard__side"><span class="pill pill--${i === 0 ? 'ok' : 'info'}">#${i + 1}</span></div>
-                </article>`).join('')}
+                  <div class="rowcard__side">
+                    <span class="pill pill--${i === 0 ? 'ok' : 'info'}">#${i + 1}</span>
+                    ${u ? `<button class="btn btn--sm btn--soft" type="button" data-act="organizer" data-id="${esc(u.id)}">Profile</button>` : ''}
+                  </div>
+                </article>`;
+              }).join('')}
             </div>
             <p class="subhead">Booking pattern</p>
             <div class="stack">
@@ -3094,13 +3222,15 @@
                   <span class="avatar avatar--sm ${avatarClass(u.id)}">${esc(initialsName(u.name))}</span>
                   <div class="rowcard__body">
                     <p class="rowcard__title">${esc(u.name)}</p>
-                    <p class="rowcard__meta">${esc(u.role)} · ${esc(u.status)}</p>
+                    <p class="rowcard__meta">${esc(u.role)} · ${esc(u.department)} · ${esc(u.status)}</p>
+                    <p class="rowcard__meta">${esc(u.email)} · ${organizerStats(u.id).organised} meetings organised</p>
                   </div>
                   <div class="rowcard__side">
                     <select class="select" style="padding:6px 28px 6px 10px;font-size:12px"
                             data-act-change="permission" data-id="${esc(u.id)}">
                       ${['Admin', 'Manager', 'Member', 'Viewer'].map((p) => `<option ${u.permission === p ? 'selected' : ''}>${p}</option>`).join('')}
                     </select>
+                    <button class="btn btn--sm btn--soft" type="button" data-act="organizer" data-id="${esc(u.id)}">Profile</button>
                   </div>
                 </article>`).join('')}
             </div>
@@ -3771,6 +3901,7 @@
           const v = readForm(e.currentTarget, fields);
           if (!v) return;
           Object.assign(DB.admin, v, { initials: String(v.initials).slice(0, 3).toUpperCase(), avatar });
+          syncAdminToTeam();   // keep the roster entry and every record in step
           saveData(); updateUI(); closeModal();
           showToast('Profile updated', `${DB.admin.name} · ${DB.admin.role}`, 'success');
         });
@@ -3881,7 +4012,11 @@
       this.list = $('#searchResults');
       this.toggle = $('#searchToggle');
 
-      this.toggle.addEventListener('click', (e) => { e.stopPropagation(); this.panel.hidden ? this.open() : this.close(); });
+      this.toggle.addEventListener('click', (e) => {
+        e.stopPropagation();
+        // Mirror the dropdown fix: trust aria-expanded, not the hidden property.
+        this.toggle.getAttribute('aria-expanded') === 'true' ? this.close() : this.open();
+      });
       $('#searchClose').addEventListener('click', () => this.close());
       $('#searchForm').addEventListener('submit', (e) => {
         e.preventDefault();
@@ -3902,6 +4037,7 @@
     open() {
       closeDropdowns();
       this.panel.hidden = false;
+      this.panel.removeAttribute('hidden');
       this.toggle.setAttribute('aria-expanded', 'true');
       this.input.setAttribute('aria-expanded', 'true');
       this.render(this.input.value.trim());
@@ -4109,6 +4245,33 @@
       refresh: () => openKpiModal(id),
       extraAction: `<button class="btn btn--ghost" type="button" data-act="schedule-meeting">${icon('plus', 'ico--sm')} Schedule</button>`
     }, cfg));
+  }
+
+  /** Organizer profile — the detail page every organizer name links to. */
+  function openOrganizerModal(id) {
+    const u = teamById(id);
+    if (!u) return;
+    const s = organizerStats(id);
+    const mine = meetings().filter((m) => m.organizerId === id);
+    const upcoming = mine.filter((m) => isFuture(m) && m.status !== 'Cancelled').sort(byDateAsc).slice(0, 4);
+    const recent = mine.filter(isDone).sort(byDateDesc).slice(0, 4);
+    const isMe = DB.admin.teamId === id;
+
+    detailModal({
+      title: u.name, sub: `${u.role} · ${u.department}`, icon: 'user',
+      refresh: () => openOrganizerModal(id),
+      stats: [['Meetings organised', String(s.organised)], ['Completed', String(s.completed)],
+        ['Upcoming', String(s.upcoming)], ['Hours held', s.hours + 'h'], ['Open action items', String(s.actionItems)]],
+      note: `Contact: ${u.email}${u.phone ? ' · ' + u.phone : ''} · workspace permission: ${u.permission}.`,
+      sections: [
+        { label: 'Upcoming meetings', empty: 'Nothing scheduled with this organizer.',
+          rows: upcoming.map((m) => meetingRow(m, { showType: true })) },
+        { label: 'Recently held', empty: 'No completed meetings yet.',
+          rows: recent.map((m) => meetingRow(m, { showType: true })) }
+      ],
+      extraAction: isMe ? `<button class="btn btn--ghost" type="button" data-act="admin-edit">${icon('edit', 'ico--sm')} Edit my profile</button>` : '',
+      route: 'meetings', routeLabel: 'Open meetings'
+    });
   }
 
   /* ---- Analytics page KPI drill-downs ---- */
@@ -4334,8 +4497,8 @@
      ====================================================================== */
   function closeDropdowns() {
     $$('[data-dropdown-menu]').forEach((menu) => {
-      if (menu.hidden) return;
       menu.hidden = true;
+      menu.setAttribute('hidden', '');
       const wrap = menu.closest('[data-dropdown]');
       const toggle = wrap && $('[data-dropdown-toggle]', wrap);
       if (toggle) toggle.setAttribute('aria-expanded', 'false');
@@ -4520,6 +4683,7 @@
       showToast('Update deleted', '', 'danger', { actionLabel: 'Undo', onAction: () => { DB.feed.splice(index, 0, removed); saveData(); updateUI(); } });
     },
 
+    'organizer': (el) => openOrganizerModal(el.dataset.id),
     'admin-view': () => openAdminProfile(),
     'admin-edit': () => openAdminForm(),
     'admin-settings': () => { closeModal(); go('settings'); },
@@ -4547,10 +4711,17 @@
       const toggle = e.target.closest('[data-dropdown-toggle]');
       if (toggle) {
         e.stopPropagation();
-        const menu = $('[data-dropdown-menu]', toggle.closest('[data-dropdown]'));
-        const isOpen = !menu.hidden;
+        const wrap = toggle.closest('[data-dropdown]');
+        const menu = wrap && $('[data-dropdown-menu]', wrap);
+        // aria-expanded is the single source of truth for open state — reading
+        // back the `hidden` property proved unreliable and left menus stuck shut.
+        const wasOpen = toggle.getAttribute('aria-expanded') === 'true';
         closeDropdowns();
-        if (!isOpen) { menu.hidden = false; toggle.setAttribute('aria-expanded', 'true'); }
+        if (menu && !wasOpen) {
+          menu.hidden = false;
+          menu.removeAttribute('hidden');
+          toggle.setAttribute('aria-expanded', 'true');
+        }
         return;
       }
       if (e.target.closest('[data-modal-close]')) { closeModal(); return; }
@@ -4662,7 +4833,10 @@
      20. BOOTSTRAP
      ====================================================================== */
   function init() {
+    applyBrand();
     loadData();
+    migrateRelations();
+    syncAdminToTeam();
     seedNotifications();
     applySettings();
     renderAdmin();
