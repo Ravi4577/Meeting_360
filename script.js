@@ -168,9 +168,29 @@
   const MEETING_TYPES = ['Discovery', 'Product Demo', 'Quarterly Review', 'Support Review', 'Onboarding', 'Internal Sync', 'Follow-up Call'];
   const LOCATIONS = ['Video call', 'On-site', 'Phone'];
 
+  /**
+   * CURRENT_USER — the centralised profile for the signed-in administrator.
+   * Every device loads this same object, so the navbar, greeting, profile menu,
+   * record ownership and organizer roster all start from one definition.
+   * (Without a backend this is the shared default; see LEGACY_ADMIN_NAME below
+   * for how workspaces saved under the previous default are migrated.)
+   */
+  const CURRENT_USER = {
+    teamId: 'u-1',
+    name: 'Tanuj Sharma',
+    role: 'Administrator',
+    email: 'tanuj.sharma@meeting360.io',
+    phone: '(020) 7946-0011',
+    department: 'Revenue',
+    initials: 'TS',
+    avatar: 1
+  };
+  /** The retired default — saved workspaces still on this name are upgraded. */
+  const LEGACY_ADMIN_NAME = 'Adrian Cole';
+
   /** The organizer roster — the single source of truth for who runs meetings. */
   const TEAM = [
-    { id: 'u-1', name: 'Adrian Cole', role: 'Administrator', department: 'Revenue', email: 'adrian.cole@meeting360.io', phone: '(020) 7946-0011', permission: 'Admin', status: 'Online' },
+    { id: CURRENT_USER.teamId, name: CURRENT_USER.name, role: CURRENT_USER.role, department: CURRENT_USER.department, email: CURRENT_USER.email, phone: CURRENT_USER.phone, permission: 'Admin', status: 'Online' },
     { id: 'u-2', name: 'Maya Iqbal', role: 'Project Manager', department: 'Customer Success', email: 'maya.iqbal@meeting360.io', phone: '(020) 7946-0022', permission: 'Manager', status: 'Online' },
     { id: 'u-3', name: 'Tomas Vega', role: 'Solutions Engineer', department: 'Solutions', email: 'tomas.vega@meeting360.io', phone: '(020) 7946-0033', permission: 'Member', status: 'In a meeting' },
     { id: 'u-4', name: 'Sara Lindqvist', role: 'Support Lead', department: 'Support', email: 'sara.lindqvist@meeting360.io', phone: '(020) 7946-0044', permission: 'Member', status: 'Away' },
@@ -237,7 +257,7 @@
         street: '9 IBM Path', city: 'St. Petersburg', state: 'CA', zip: '79297', country: 'USA',
         otherStreet: '', otherCity: '', otherState: '', otherZip: '', otherCountry: '',
         description: 'Executive sponsor for the analytics rollout across three regional teams.',
-        favourite: true, owner: 'Adrian Cole', reportsTo: 'Denise Whitaker (VP Product)',
+        favourite: true, owner: CURRENT_USER.name, reportsTo: 'Denise Whitaker (VP Product)',
         leadSource: 'Webinar — Q2 Product Clinic', industry: 'Financial Services',
         employees: '2,400', annualRevenue: '₹1.2B', timezone: '(GMT-05:00) Eastern Time',
         language: 'English (US)', linkedin: 'linkedin.com/in/lilian-marron',
@@ -254,7 +274,7 @@
         street: '18 Harbour Row', city: 'Rotterdam', state: 'ZH', zip: '3011', country: 'Netherlands',
         otherStreet: '', otherCity: '', otherState: '', otherZip: '', otherCountry: '',
         description: 'Evaluating the platform for a 40-site logistics rollout.',
-        favourite: false, owner: 'Adrian Cole', reportsTo: 'Board of Directors',
+        favourite: false, owner: CURRENT_USER.name, reportsTo: 'Board of Directors',
         leadSource: 'Inbound — Pricing page', industry: 'Transport & Logistics',
         employees: '860', annualRevenue: '₹310M', timezone: '(GMT+01:00) Amsterdam',
         language: 'English (UK)', linkedin: 'linkedin.com/in/marcus-feld',
@@ -424,7 +444,10 @@
     const ws = seedWorkspace();
     return {
       version: 1,
-      admin: { teamId: 'u-1', name: 'Adrian Cole', email: 'adrian.cole@meeting360.io', role: 'Administrator', initials: 'AC', avatar: 1 },
+      admin: {
+        teamId: CURRENT_USER.teamId, name: CURRENT_USER.name, email: CURRENT_USER.email,
+        role: CURRENT_USER.role, initials: CURRENT_USER.initials, avatar: CURRENT_USER.avatar
+      },
       settings: {
         density: 'comfortable', animations: true, landing: 'dashboard',
         defaultDuration: 30, defaultType: 'Discovery', defaultLocation: 'Video call',
@@ -558,6 +581,17 @@
    */
   function migrateRelations() {
     const fallback = ['Revenue', 'Customer Success', 'Solutions', 'Support', 'Operations'];
+
+    /* Workspaces saved under the retired default adopt the central profile.
+       A profile the user renamed themselves is left untouched. */
+    if (DB.admin.name === LEGACY_ADMIN_NAME) {
+      Object.assign(DB.admin, {
+        teamId: CURRENT_USER.teamId, name: CURRENT_USER.name, role: CURRENT_USER.role,
+        email: CURRENT_USER.email, initials: CURRENT_USER.initials
+      });
+    }
+    // Ownership strings written before the rename point at the current user.
+    DB.contacts.forEach((c) => { if (c.owner === LEGACY_ADMIN_NAME) c.owner = DB.admin.name; });
     DB.team.forEach((u, i) => {
       // Refresh the roster profile fields from the canonical list; permission and
       // status stay as the workspace set them.
