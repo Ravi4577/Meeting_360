@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description" content="Nexus CRM — a contact-centric CRM workspace built with HTML, CSS and vanilla JavaScript." />
+  <meta name="description" content="Meeting 360 — meeting intelligence, scheduling and customer interaction tracking, built with HTML, CSS and vanilla JavaScript." />
   <meta name="theme-color" content="#141a33" />
-  <title>Nexus CRM</title>
+  <title>Meeting 360</title>
 
   <!-- Google Font: Poppins -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -76,6 +76,10 @@
     <symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.6"/><circle cx="12" cy="12" r="4.6"/><circle cx="12" cy="12" r=".9"/></symbol>
     <symbol id="i-chat" viewBox="0 0 24 24"><path d="M20.6 12.4a7.6 7.6 0 0 1-8.2 7.6c-.8 0-1.6-.1-2.3-.3L4.4 21l1.4-4.8A7.6 7.6 0 0 1 12.4 4.4a7.6 7.6 0 0 1 8.2 8z"/></symbol>
     <symbol id="i-board" viewBox="0 0 24 24"><rect x="3.4" y="4" width="17.2" height="16" rx="2.2"/><path d="M9 4v16M15 4v16"/></symbol>
+    <symbol id="i-sparkle" viewBox="0 0 24 24"><path d="M12 2.8 13.9 8l5.2 1.9-5.2 1.9L12 17l-1.9-5.2L4.9 9.9 10.1 8z"/><path d="M18.6 15.4l.8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8zM5.2 2.8l.6 1.7 1.7.6-1.7.6-.6 1.7-.6-1.7L2.9 5.1l1.7-.6z"/></symbol>
+    <symbol id="i-mic" viewBox="0 0 24 24"><rect x="9" y="2.6" width="6" height="11.2" rx="3"/><path d="M5.4 11.4v1.2a6.6 6.6 0 0 0 13.2 0v-1.2M12 19.2v2.2M8.4 21.4h7.2"/></symbol>
+    <symbol id="i-bars" viewBox="0 0 24 24"><path d="M4 20.4V13M9.4 20.4V6.6M14.8 20.4v-9.6M20.2 20.4V3.6"/></symbol>
+    <symbol id="i-repeat" viewBox="0 0 24 24"><path d="M4 8.4A3.4 3.4 0 0 1 7.4 5h13.2M17.4 1.8 20.6 5l-3.2 3.2"/><path d="M20 15.6a3.4 3.4 0 0 1-3.4 3.4H3.4M6.6 22.2 3.4 19l3.2-3.2"/></symbol>
   </svg>
 
   <!-- =======================================================================
@@ -89,9 +93,9 @@
         <svg class="ico"><use href="#i-menu" /></svg>
       </button>
 
-      <a class="brand" href="#/home">
+      <a class="brand" href="#/dashboard">
         <span class="brand__mark"><svg class="ico"><use href="#i-pulse" /></svg></span>
-        <span class="brand__text">Nexus<span>CRM</span></span>
+        <span class="brand__text">Meeting<span>360</span></span>
       </a>
 
       <nav class="mainnav" id="primaryNav" aria-label="Primary navigation">
@@ -108,23 +112,23 @@
           </button>
           <div class="dropdown__menu dropdown__menu--right" role="menu" data-dropdown-menu hidden>
             <p class="dropdown__title">Quick create</p>
+            <button class="dropdown__item" role="menuitem" type="button" data-action="schedule-meeting">
+              <svg class="ico"><use href="#i-video" /></svg> Schedule Meeting</button>
             <button class="dropdown__item" role="menuitem" type="button" data-action="new:tasks">
-              <svg class="ico"><use href="#i-task" /></svg> Task</button>
-            <button class="dropdown__item" role="menuitem" type="button" data-action="new:meetings">
-              <svg class="ico"><use href="#i-video" /></svg> Meeting</button>
+              <svg class="ico"><use href="#i-task" /></svg> Action Item</button>
             <button class="dropdown__item" role="menuitem" type="button" data-action="new:notes">
-              <svg class="ico"><use href="#i-note" /></svg> Note</button>
-            <button class="dropdown__item" role="menuitem" type="button" data-action="new:emails">
-              <svg class="ico"><use href="#i-mail" /></svg> Email</button>
-            <button class="dropdown__item" role="menuitem" type="button" data-action="new:calls">
-              <svg class="ico"><use href="#i-phone" /></svg> Call log</button>
+              <svg class="ico"><use href="#i-note" /></svg> Meeting Note</button>
+            <button class="dropdown__item" role="menuitem" type="button" data-action="new:followups">
+              <svg class="ico"><use href="#i-repeat" /></svg> Follow-up</button>
+            <button class="dropdown__item" role="menuitem" type="button" data-action="new:recordings">
+              <svg class="ico"><use href="#i-mic" /></svg> Upload Recording</button>
             <div class="dropdown__sep" role="separator"></div>
             <button class="dropdown__item" role="menuitem" type="button" data-action="new-contact">
               <svg class="ico"><use href="#i-user" /></svg> Contact</button>
-            <button class="dropdown__item" role="menuitem" type="button" data-action="new:opportunities">
-              <svg class="ico"><use href="#i-bulb" /></svg> Deal</button>
-            <button class="dropdown__item" role="menuitem" type="button" data-action="new:cases">
-              <svg class="ico"><use href="#i-support" /></svg> Support ticket</button>
+            <button class="dropdown__item" role="menuitem" type="button" data-action="new:calls">
+              <svg class="ico"><use href="#i-phone" /></svg> Call log</button>
+            <button class="dropdown__item" role="menuitem" type="button" data-action="new:emails">
+              <svg class="ico"><use href="#i-mail" /></svg> Email</button>
           </div>
         </div>
 
@@ -138,7 +142,7 @@
             <form class="search__form" id="searchForm" role="search" autocomplete="off">
               <svg class="ico search__icon"><use href="#i-search" /></svg>
               <input class="search__input" id="searchInput" type="search" name="q"
-                     placeholder="Search contacts, deals, tickets, records…" aria-label="Search the CRM"
+                     placeholder="Search meetings, contacts, notes, action items…" aria-label="Search Meeting 360"
                      aria-controls="searchResults" aria-expanded="false" role="combobox" />
               <button class="icon-btn icon-btn--sm" id="searchClose" type="button" aria-label="Close search">
                 <svg class="ico"><use href="#i-close" /></svg>
@@ -182,7 +186,7 @@
               <span class="avatar avatar--sm" id="adminAvatarMenu">AC</span>
               <div>
                 <p class="dropdown__user-name" id="adminNameMenu">Adrian Cole</p>
-                <p class="dropdown__user-mail" id="adminMailMenu">adrian.cole@nexuscrm.io</p>
+                <p class="dropdown__user-mail" id="adminMailMenu">adrian.cole@meeting360.io</p>
               </div>
             </div>
             <div class="dropdown__sep" role="separator"></div>
@@ -235,7 +239,7 @@
     <div class="lock__card card">
       <span class="lock__icon"><svg class="ico"><use href="#i-lock" /></svg></span>
       <h2>You are signed out</h2>
-      <p>Your Nexus CRM session has ended. All of your data is safely stored on this device.</p>
+      <p>Your Meeting 360 session has ended. All of your data is safely stored on this device.</p>
       <button class="btn btn--primary" type="button" id="signBackIn">
         <svg class="ico"><use href="#i-logout" /></svg> Sign back in
       </button>
