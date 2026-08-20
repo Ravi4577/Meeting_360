@@ -777,6 +777,8 @@ mark { background: rgba(99, 102, 241, .18); color: inherit; border-radius: 3px; 
   transition: transform var(--t-fast), box-shadow var(--t-fast);
 }
 .kpi:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
+/* Clickable summary tiles keep the exact look of the static ones */
+button.kpi { width: 100%; text-align: left; font: inherit; color: inherit; cursor: pointer; }
 .kpi__head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .kpi__icon { width: 34px; height: 34px; border-radius: 11px; display: grid; place-items: center; background: var(--brand-50); color: var(--brand-600); }
 .kpi__label { font-size: 11px; color: var(--text-mute); text-transform: uppercase; letter-spacing: .06em; }
