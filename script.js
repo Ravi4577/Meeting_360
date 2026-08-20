@@ -31,7 +31,9 @@
 
   const uid = (prefix) => `${prefix}-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
 
-  const money = (n) => '$' + Number(n || 0).toLocaleString('en-US', { maximumFractionDigits: 0 });
+  /** Workspace currency symbol — used by every amount rendered in the UI. */
+  const CURRENCY = '₹';
+  const money = (n) => CURRENCY + Number(n || 0).toLocaleString('en-US', { maximumFractionDigits: 0 });
 
   const todayISO = () => new Date().toISOString().slice(0, 10);
 
@@ -130,7 +132,7 @@
           description: 'Champion for the analytics rollout across three regional teams.',
           favourite: true, owner: 'Adrian Cole', reportsTo: 'Denise Whitaker (VP Product)',
           leadSource: 'Webinar — Q2 Product Clinic', industry: 'Financial Services',
-          employees: '2,400', annualRevenue: '$1.2B', timezone: '(GMT-05:00) Eastern Time',
+          employees: '2,400', annualRevenue: '₹1.2B', timezone: '(GMT-05:00) Eastern Time',
           language: 'English (US)', linkedin: 'linkedin.com/in/lilian-marron',
           lifecycle: 'Customer — Expansion', nps: 9, engagement: 78,
           doNotCall: false, emailOptOut: false,
@@ -147,7 +149,7 @@
           description: 'Evaluating the platform for a 40-site logistics rollout.',
           favourite: false, owner: 'Adrian Cole', reportsTo: 'Board of Directors',
           leadSource: 'Inbound — Pricing page', industry: 'Transport & Logistics',
-          employees: '860', annualRevenue: '$310M', timezone: '(GMT+01:00) Amsterdam',
+          employees: '860', annualRevenue: '₹310M', timezone: '(GMT+01:00) Amsterdam',
           language: 'English (UK)', linkedin: 'linkedin.com/in/marcus-feld',
           lifecycle: 'Prospect — Evaluation', nps: 7, engagement: 54,
           doNotCall: false, emailOptOut: false,
@@ -164,7 +166,7 @@
           description: 'Technical champion. Runs the data model review board.',
           favourite: true, owner: 'Adrian Cole', reportsTo: 'CTO',
           leadSource: 'Partner referral', industry: 'Software & Analytics',
-          employees: '1,150', annualRevenue: '$95M', timezone: '(GMT+05:30) India',
+          employees: '1,150', annualRevenue: '₹95M', timezone: '(GMT+05:30) India',
           language: 'English (IN)', linkedin: 'linkedin.com/in/priya-raman',
           lifecycle: 'Customer — Onboarding', nps: 10, engagement: 66,
           doNotCall: false, emailOptOut: false,
@@ -299,6 +301,12 @@
       DB.admin = Object.assign(base.admin, saved.admin || {});
       DB.settings = Object.assign(base.settings, saved.settings || {});
       DB.records = Object.assign(base.records, saved.records || {});
+
+      // Currency migration for workspaces saved before the switch to ₹.
+      // Only the symbol is swapped — the figures are left exactly as they were.
+      DB.contacts.forEach((c) => {
+        if (typeof c.annualRevenue === 'string') c.annualRevenue = c.annualRevenue.replace(/^\$/, CURRENCY);
+      });
       return true;
     } catch (err) {
       console.error('[Nexus CRM] Failed to read saved data, falling back to defaults.', err);
@@ -446,7 +454,7 @@
       make: () => ({ title: '', amount: 0, status: 'Draft', date: todayISO(), validUntil: daysFromNow(30) }),
       fields: [
         { name: 'title', label: 'Quote title', required: true, full: true },
-        { name: 'amount', label: 'Amount ($)', type: 'number', required: true, min: 0 },
+        { name: 'amount', label: 'Amount (₹)', type: 'number', required: true, min: 0 },
         { name: 'status', label: 'Status', type: 'select', options: ['Draft', 'Sent', 'Accepted', 'Declined'] },
         { name: 'date', label: 'Issued on', type: 'date' },
         { name: 'validUntil', label: 'Valid until', type: 'date' }
@@ -465,7 +473,7 @@
         { name: 'number', label: 'Invoice number', required: true },
         { name: 'product', label: 'Product', required: true },
         { name: 'units', label: 'Units', type: 'number', min: 1, max: 9999 },
-        { name: 'amount', label: 'Amount ($)', type: 'number', required: true, min: 0 },
+        { name: 'amount', label: 'Amount (₹)', type: 'number', required: true, min: 0 },
         { name: 'status', label: 'Status', type: 'select', options: ['Paid', 'Pending', 'Overdue'] },
         { name: 'date', label: 'Invoice date', type: 'date' }
       ]
@@ -532,7 +540,7 @@
       fields: [
         { name: 'name', label: 'Deal name', required: true, full: true },
         { name: 'stage', label: 'Stage', type: 'select', options: STAGES },
-        { name: 'amount', label: 'Amount ($)', type: 'number', required: true, min: 0 },
+        { name: 'amount', label: 'Amount (₹)', type: 'number', required: true, min: 0 },
         { name: 'close', label: 'Expected close', type: 'date' },
         { name: 'probability', label: 'Probability (%)', type: 'number', min: 0, max: 100 },
         { name: 'owner', label: 'Deal owner' }
@@ -551,7 +559,7 @@
         { name: 'name', label: 'Campaign name', required: true, full: true },
         { name: 'channel', label: 'Channel', type: 'select', options: ['Email', 'Webinar', 'Events', 'Paid Social'] },
         { name: 'status', label: 'Status', type: 'select', options: ['Planned', 'Active', 'Completed'] },
-        { name: 'budget', label: 'Budget ($)', type: 'number', min: 0 },
+        { name: 'budget', label: 'Budget (₹)', type: 'number', min: 0 },
         { name: 'date', label: 'Start date', type: 'date' },
         { name: 'sent', label: 'Sent', type: 'number', min: 0 },
         { name: 'opened', label: 'Opened', type: 'number', min: 0 },
@@ -926,15 +934,25 @@
       ${cta ? `<div class="empty__cta">${cta}</div>` : ''}
     </div>`;
 
-  const kpiCard = ({ label, value, note, iconName, tone = '' }) => `
-    <div class="kpi">
+  /**
+   * Summary tile. Passing `act` renders it as a button that opens the matching
+   * detail modal — the markup and classes stay identical either way.
+   */
+  const kpiCard = ({ label, value, note, iconName, tone = '', act }) => {
+    const tag = act ? 'button' : 'div';
+    const attrs = act
+      ? ` type="button" data-act="kpi" data-id="${esc(act)}" aria-label="${esc(label)} — open details"`
+      : '';
+    return `
+    <${tag} class="kpi"${attrs}>
       <div class="kpi__head">
         <p class="kpi__label">${esc(label)}</p>
         <span class="kpi__icon">${icon(iconName, 'ico--sm')}</span>
       </div>
       <p class="kpi__value ${tone}">${esc(value)}</p>
       <p class="kpi__note">${esc(note || '')}</p>
-    </div>`;
+    </${tag}>`;
+  };
 
   const searchToolbar = ({ key, placeholder, count, total, extra = '', actions = '' }) => `
     <div class="toolbar">
@@ -1088,12 +1106,12 @@
       })}
 
       <div class="kpis">
-        ${kpiCard({ label: 'Open pipeline', value: money(sum(deals, (d) => d.amount)), note: `${deals.length} active deal${deals.length === 1 ? '' : 's'}`, iconName: 'trend' })}
-        ${kpiCard({ label: 'Weighted forecast', value: money(weighted), note: 'Probability adjusted', iconName: 'target' })}
-        ${kpiCard({ label: 'Revenue collected', value: money(paidRevenue()), note: 'Paid invoices', iconName: 'dollar' })}
-        ${kpiCard({ label: 'Open tickets', value: String(openTickets().length), note: `${allRecords('cases').filter((c) => c.priority === 'High' && c.status !== 'Resolved').length} high priority`, iconName: 'support' })}
-        ${kpiCard({ label: 'Tasks outstanding', value: String(openTasks().length), note: 'Across all contacts', iconName: 'task' })}
-        ${kpiCard({ label: 'Contacts', value: String(DB.contacts.length), note: `${DB.contacts.filter((c) => c.favourite).length} starred`, iconName: 'users' })}
+        ${kpiCard({ act: 'pipeline', label: 'Open pipeline', value: money(sum(deals, (d) => d.amount)), note: `${deals.length} active deal${deals.length === 1 ? '' : 's'}`, iconName: 'trend' })}
+        ${kpiCard({ act: 'forecast', label: 'Weighted forecast', value: money(weighted), note: 'Probability adjusted', iconName: 'target' })}
+        ${kpiCard({ act: 'revenue', label: 'Revenue collected', value: money(paidRevenue()), note: 'Paid invoices', iconName: 'dollar' })}
+        ${kpiCard({ act: 'tickets', label: 'Open tickets', value: String(openTickets().length), note: `${allRecords('cases').filter((c) => c.priority === 'High' && c.status !== 'Resolved').length} high priority`, iconName: 'support' })}
+        ${kpiCard({ act: 'tasks', label: 'Tasks outstanding', value: String(openTasks().length), note: 'Across all contacts', iconName: 'task' })}
+        ${kpiCard({ act: 'contacts', label: 'Contacts', value: String(DB.contacts.length), note: `${DB.contacts.filter((c) => c.favourite).length} starred`, iconName: 'users' })}
       </div>
 
       <section class="section">
@@ -2120,6 +2138,195 @@
   }
 
   /* ======================================================================
+     12b. SUMMARY TILE MODALS (Home dashboard)
+     Each top card opens a read-out of the same records it counts.
+     ====================================================================== */
+  const mstat = (label, value, small) =>
+    `<div class="mstat"><p class="mstat__label">${esc(label)}</p>
+     <p class="mstat__value"${small ? ' style="font-size:17px"' : ''}>${esc(value)}</p></div>`;
+
+  const weightedOf = (d) => Math.round(Number(d.amount || 0) * (Number(d.probability) || 0) / 100);
+
+  function kpiModalConfig(id) {
+    const deals = openDeals();
+    const cases = allRecords('cases');
+    const tickets = openTickets();
+    const tasks = openTasks();
+    const paid = allRecords('invoices').filter((i) => i.status === 'Paid');
+
+    switch (id) {
+      case 'pipeline': {
+        const stages = STAGES.filter((s) => !s.startsWith('Closed'));
+        const totalValue = sum(deals, (d) => d.amount);
+        return {
+          title: 'Pipeline Details', sub: 'Every deal that is still open', icon: 'trend',
+          body: `
+            <div class="mstats">
+              ${mstat('Active Deals', String(deals.length))}
+              ${mstat('Total Pipeline Value', money(totalValue), true)}
+            </div>
+            <p class="subhead">Deal stages</p>
+            <div class="stack">
+              ${stages.map((stage) => {
+                const col = deals.filter((d) => d.stage === stage);
+                const value = sum(col, (d) => d.amount);
+                const share = totalValue ? Math.round((value / totalValue) * 100) : 0;
+                return `
+                  <article class="rowcard">
+                    <span class="rowcard__icon" style="color:${STAGE_ACCENT[stage]}">${icon('board', 'ico--sm')}</span>
+                    <div class="rowcard__body">
+                      <p class="rowcard__title">${esc(stage)}</p>
+                      <p class="rowcard__meta">${col.length} deal${col.length === 1 ? '' : 's'} · ${money(value)}</p>
+                      <div class="meter" style="margin-top:8px"><span class="meter__fill" style="width:${share}%"></span></div>
+                    </div>
+                    <div class="rowcard__side"><span class="pill pill--info">${share}%</span></div>
+                  </article>`;
+              }).join('')}
+            </div>
+            <p class="subhead">Active deals</p>
+            <div class="stack">
+              ${deals.length ? deals.map((d) => recordRow('opportunities', d, { showContact: true })).join('')
+                : '<p class="empty-note">No open deals right now.</p>'}
+            </div>`,
+          footer: `<button class="btn btn--quiet" type="button" data-modal-close>Close</button>
+                   <button class="btn btn--primary" type="button" data-act="go" data-route="sales">${icon('trend', 'ico--sm')} Open sales pipeline</button>`
+        };
+      }
+
+      case 'forecast': {
+        const weighted = sum(deals, weightedOf);
+        const avg = deals.length ? Math.round(sum(deals, (d) => Number(d.probability) || 0) / deals.length) : 0;
+        return {
+          title: 'Forecast Details', sub: 'Probability adjusted revenue', icon: 'target',
+          body: `
+            <div class="mstats">
+              ${mstat('Weighted Amount', money(weighted), true)}
+              ${mstat('Open Deals', String(deals.length))}
+              ${mstat('Avg Probability', avg + '%')}
+            </div>
+            <div class="fieldset-note">${icon('info', 'ico--sm')}
+              <span>Each deal contributes its value multiplied by its win probability.</span>
+            </div>
+            <p class="subhead">Per deal</p>
+            <div class="stack">
+              ${deals.length ? deals.map((d) => `
+                <article class="rowcard">
+                  <span class="rowcard__icon" style="color:${MODULES.opportunities.accent}">${icon('bulb', 'ico--sm')}</span>
+                  <div class="rowcard__body">
+                    <p class="rowcard__title">${esc(d.name)}</p>
+                    <p class="rowcard__meta">${money(d.amount)} × ${d.probability}% · ${esc(d.stage)} · ${esc(fullName(contactById(d.contactId)))}</p>
+                  </div>
+                  <div class="rowcard__side"><span class="pill pill--info">${money(weightedOf(d))}</span></div>
+                </article>`).join('')
+                : '<p class="empty-note">No open deals to forecast.</p>'}
+            </div>`,
+          footer: `<button class="btn btn--quiet" type="button" data-modal-close>Close</button>
+                   <button class="btn btn--primary" type="button" data-act="go" data-route="sales">${icon('trend', 'ico--sm')} Open sales pipeline</button>`
+        };
+      }
+
+      case 'revenue': {
+        const pending = allRecords('invoices').filter((i) => i.status !== 'Paid');
+        return {
+          title: 'Revenue Details', sub: 'Collected from paid invoices', icon: 'dollar',
+          body: `
+            <div class="mstats">
+              ${mstat('Paid Invoices', String(paid.length))}
+              ${mstat('Collected Revenue', money(sum(paid, (i) => i.amount)), true)}
+              ${mstat('Outstanding', money(sum(pending, (i) => i.amount)), true)}
+            </div>
+            <p class="subhead">Paid invoices</p>
+            <div class="stack">
+              ${paid.length ? paid.map((i) => recordRow('invoices', i, { showContact: true })).join('')
+                : '<p class="empty-note">No invoices have been paid yet.</p>'}
+            </div>
+            ${pending.length ? `<p class="subhead">Awaiting payment</p>
+              <div class="stack">${pending.map((i) => recordRow('invoices', i, { showContact: true })).join('')}</div>` : ''}`,
+          footer: `<button class="btn btn--primary" type="button" data-modal-close data-autofocus>Close</button>`
+        };
+      }
+
+      case 'tickets': {
+        const high = cases.filter((t) => t.priority === 'High' && t.status !== 'Resolved' && t.status !== 'Closed');
+        const resolved = cases.filter((t) => t.status === 'Resolved' || t.status === 'Closed');
+        return {
+          title: 'Ticket Summary', sub: 'Support queue across every contact', icon: 'support',
+          body: `
+            <div class="mstats">
+              ${mstat('Total Tickets', String(tickets.length))}
+              ${mstat('High Priority', String(high.length))}
+              ${mstat('Resolved', String(resolved.length))}
+            </div>
+            <p class="subhead">Open tickets</p>
+            <div class="stack">
+              ${tickets.length ? tickets.map((t) => recordRow('cases', t, { showContact: true })).join('')
+                : '<p class="empty-note">The support queue is clear.</p>'}
+            </div>`,
+          footer: `<button class="btn btn--quiet" type="button" data-modal-close>Close</button>
+                   <button class="btn btn--primary" type="button" data-act="go" data-route="support">${icon('support', 'ico--sm')} Open support</button>`
+        };
+      }
+
+      case 'tasks': {
+        const high = tasks.filter((t) => t.priority === 'High');
+        const inProgress = tasks.filter((t) => t.status === 'In progress');
+        return {
+          title: 'Task Summary', sub: 'Everything still outstanding', icon: 'task',
+          body: `
+            <div class="mstats">
+              ${mstat('Pending Tasks', String(tasks.length))}
+              ${mstat('High Priority', String(high.length))}
+              ${mstat('In Progress', String(inProgress.length))}
+            </div>
+            <p class="subhead">Outstanding tasks</p>
+            <div class="stack">
+              ${tasks.length
+                ? tasks.slice().sort((a, b) => String(a.due).localeCompare(String(b.due)))
+                    .map((t) => recordRow('tasks', t, { showContact: true })).join('')
+                : '<p class="empty-note">Nothing outstanding — the queue is clear.</p>'}
+            </div>`,
+          footer: `<button class="btn btn--quiet" type="button" data-modal-close>Close</button>
+                   <button class="btn btn--primary" type="button" data-act="new-record" data-key="tasks">${icon('plus', 'ico--sm')} New task</button>`
+        };
+      }
+
+      case 'contacts':
+      default: {
+        const starred = DB.contacts.filter((c) => c.favourite);
+        return {
+          title: 'Contact Summary', sub: 'People in this workspace', icon: 'users',
+          body: `
+            <div class="mstats">
+              ${mstat('Total Contacts', String(DB.contacts.length))}
+              ${mstat('Starred Contacts', String(starred.length))}
+            </div>
+            <p class="subhead">All contacts</p>
+            <div class="stack">
+              ${DB.contacts.map((c) => `
+                <article class="rowcard">
+                  <span class="avatar avatar--sm ${avatarClass(c.id)}">${esc(initialsOf(c.firstName, c.lastName))}</span>
+                  <div class="rowcard__body">
+                    <p class="rowcard__title">${esc(fullName(c))}${c.favourite ? ' ★' : ''}</p>
+                    <p class="rowcard__meta">${esc(c.jobTitle || '—')} · ${esc(c.accountName || '—')}</p>
+                  </div>
+                  <div class="rowcard__side">
+                    <button class="btn btn--sm btn--soft" type="button" data-act="open-contact" data-id="${esc(c.id)}">Open</button>
+                  </div>
+                </article>`).join('')}
+            </div>`,
+          footer: `<button class="btn btn--quiet" type="button" data-modal-close>Close</button>
+                   <button class="btn btn--primary" type="button" data-act="go" data-route="contacts">${icon('users', 'ico--sm')} Open contacts</button>`
+        };
+      }
+    }
+  }
+
+  function openKpiModal(id) {
+    const cfg = kpiModalConfig(id);
+    openModal(Object.assign({ refresh: () => openKpiModal(id) }, cfg));
+  }
+
+  /* ======================================================================
      13. CONTACT CRUD
      ====================================================================== */
   const CONTACT_FIELDS = [
@@ -2647,10 +2854,11 @@
 
   /** Map of every data-act / data-action handler in the application. */
   const ACTIONS = {
-    'go': (el) => go(el.dataset.route, el.dataset.param),
+    'go': (el) => { closeModal(); go(el.dataset.route, el.dataset.param); },
     'reload': () => location.reload(),
+    'kpi': (el) => openKpiModal(el.dataset.id),
 
-    'open-contact': (el) => go('contact', el.dataset.id),
+    'open-contact': (el) => { closeModal(); go('contact', el.dataset.id); },
     'new-contact': () => openContactForm(null),
     'edit-contact': (el) => openContactForm(el.dataset.id || DB.activeContactId),
     'delete-contact': (el) => deleteContact(el.dataset.id || DB.activeContactId),
