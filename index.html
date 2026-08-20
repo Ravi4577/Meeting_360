@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Nexus CRM — a contact-centric CRM workspace built with HTML, CSS and vanilla JavaScript." />
+  <meta name="theme-color" content="#141a33" />
+  <title>Nexus CRM</title>
+
+  <!-- Google Font: Poppins -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to main content</a>
+
+  <!-- =======================================================================
+       ICON SPRITE
+       Every icon is an inline SVG symbol — no icon font, no CDN.
+       Use anywhere with: <svg class="ico"><use href="#i-name"/></svg>
+  ======================================================================== -->
+  <svg class="sprite" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+    <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 10.6 12 3l9 7.6V20a2 2 0 0 1-2 2h-4v-7h-6v7H5a2 2 0 0 1-2-2z"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20.5 20.5 16.7 16.7"/></symbol>
+    <symbol id="i-bell" viewBox="0 0 24 24"><path d="M18 8.5a6 6 0 1 0-12 0c0 6.5-3 7.5-3 7.5h18s-3-1-3-7.5"/><path d="M13.7 20a2 2 0 0 1-3.4 0"/></symbol>
+    <symbol id="i-user" viewBox="0 0 24 24"><path d="M20 21v-1.8A4.2 4.2 0 0 0 15.8 15H8.2A4.2 4.2 0 0 0 4 19.2V21"/><circle cx="12" cy="7.5" r="3.8"/></symbol>
+    <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m6 9.5 6 6 6-6"/></symbol>
+    <symbol id="i-chevron-right" viewBox="0 0 24 24"><path d="m9.5 6 6 6-6 6"/></symbol>
+    <symbol id="i-arrow-left" viewBox="0 0 24 24"><path d="M20 12H4M10 6l-6 6 6 6"/></symbol>
+    <symbol id="i-menu" viewBox="0 0 24 24"><path d="M3.5 7h17M3.5 12h17M3.5 17h17"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-star" viewBox="0 0 24 24"><path d="m12 3.4 2.7 5.5 6 .9-4.35 4.2 1.03 6L12 17.2 6.62 20l1.03-6L3.3 9.8l6-.9z"/></symbol>
+    <symbol id="i-phone" viewBox="0 0 24 24"><path d="M21.5 16.9v2.4a2 2 0 0 1-2.2 2 19.6 19.6 0 0 1-8.5-3 19.3 19.3 0 0 1-6-6 19.6 19.6 0 0 1-3-8.6A2 2 0 0 1 3.8 1.5h2.4a2 2 0 0 1 2 1.7c.13 1 .36 1.9.7 2.8a2 2 0 0 1-.45 2.1L7.4 9.2a16 16 0 0 0 6 6l1.1-1.05a2 2 0 0 1 2.1-.45c.9.34 1.85.57 2.8.7a2 2 0 0 1 1.7 2z"/></symbol>
+    <symbol id="i-mail" viewBox="0 0 24 24"><rect x="3" y="5.5" width="18" height="13" rx="2"/><path d="m3.6 7 8.4 5.6L20.4 7"/></symbol>
+    <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21.2s7-6.1 7-11.2a7 7 0 1 0-14 0c0 5.1 7 11.2 7 11.2z"/><circle cx="12" cy="10" r="2.6"/></symbol>
+    <symbol id="i-edit" viewBox="0 0 24 24"><path d="M4 20.2h4.2L20 8.4 15.8 4.2 4 16z"/><path d="m14.4 5.6 4.2 4.2"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 6.8h16M9.5 6.8V4.5h5v2.3M6.4 6.8 7.4 20a1 1 0 0 0 1 .9h7.2a1 1 0 0 0 1-.9l1-13.2"/></symbol>
+    <symbol id="i-note" viewBox="0 0 24 24"><path d="M6 3h8l4.5 4.5V21H6z"/><path d="M14 3v4.6h4.5M9 12.5h6M9 16.5h4"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12.6 4.6 4.6L19 7.8"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><path d="m6.5 6.5 11 11M17.5 6.5l-11 11"/></symbol>
+    <symbol id="i-users" viewBox="0 0 24 24"><path d="M16 21v-1.7A4.3 4.3 0 0 0 11.7 15H6.3A4.3 4.3 0 0 0 2 19.3V21"/><circle cx="9" cy="7.5" r="3.6"/><path d="M22 21v-1.7a4.3 4.3 0 0 0-3.2-4.1M15.6 4.1a3.6 3.6 0 0 1 0 6.9"/></symbol>
+    <symbol id="i-task" viewBox="0 0 24 24"><path d="M9 4.5H7.2A2.2 2.2 0 0 0 5 6.7v12.1A2.2 2.2 0 0 0 7.2 21h9.6a2.2 2.2 0 0 0 2.2-2.2V6.7a2.2 2.2 0 0 0-2.2-2.2H15"/><rect x="9" y="2.6" width="6" height="3.8" rx="1.2"/><path d="m9.2 13.4 2 2 3.8-4"/></symbol>
+    <symbol id="i-case" viewBox="0 0 24 24"><rect x="3" y="7.5" width="18" height="13" rx="2"/><path d="M8.5 7.5V5.8a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v1.7M3 12.6h18"/></symbol>
+    <symbol id="i-quote" viewBox="0 0 24 24"><path d="M6.5 2.8h7.2L18.5 7.6V21.2H6.5z"/><path d="M13.4 2.8v5h5M9.6 12.4h6M9.6 16.2h4"/></symbol>
+    <symbol id="i-invoice" viewBox="0 0 24 24"><path d="M5.6 2.8h12.8v18.4l-2.6-1.7-2.5 1.7-2.6-1.7-2.5 1.7-2.6-1.7z"/><path d="M9 8h6M9 12h6"/></symbol>
+    <symbol id="i-doc" viewBox="0 0 24 24"><path d="M6.2 2.8h7.4L18.2 7.4v13.8H6.2z"/><path d="M13.2 2.8v4.8h5M9.2 13h6M9.2 16.8h3.6"/></symbol>
+    <symbol id="i-bulb" viewBox="0 0 24 24"><path d="M9.5 18.4h5M10.4 21.2h3.2"/><path d="M12 2.8a6.2 6.2 0 0 0-3.6 11.3c.63.45 1.02 1.15 1.02 1.9v.4h5.16v-.4c0-.75.39-1.45 1.02-1.9A6.2 6.2 0 0 0 12 2.8z"/></symbol>
+    <symbol id="i-megaphone" viewBox="0 0 24 24"><path d="M3 10v4a1.2 1.2 0 0 0 1.2 1.2H7l7.6 4.3V4.5L7 8.8H4.2A1.2 1.2 0 0 0 3 10z"/><path d="M18.4 9a4 4 0 0 1 0 6M7 15.2V20"/></symbol>
+    <symbol id="i-lead" viewBox="0 0 24 24"><path d="M15.5 21v-1.8A4.2 4.2 0 0 0 11.3 15H6.2A4.2 4.2 0 0 0 2 19.2V21"/><circle cx="8.7" cy="7.5" r="3.8"/><path d="M19 8.2v6M22 11.2h-6"/></symbol>
+    <symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="16" rx="2"/><path d="M3.5 10h17M8.5 2.8v4M15.5 2.8v4"/></symbol>
+    <symbol id="i-video" viewBox="0 0 24 24"><rect x="2.8" y="6" width="12.6" height="12" rx="2.4"/><path d="m15.4 11 5.8-3.4v8.8L15.4 13z"/></symbol>
+    <symbol id="i-dollar" viewBox="0 0 24 24"><path d="M12 2.6v18.8"/><path d="M16.8 6.6c0-1.9-2.2-3-4.8-3s-4.8 1-4.8 3.1 2.1 2.8 4.8 3.3 4.8 1 4.8 3.2-2.2 3.2-4.8 3.2-4.8-1.1-4.8-3"/></symbol>
+    <symbol id="i-package" viewBox="0 0 24 24"><path d="M12 2.8 20.5 7.4v9.2L12 21.2 3.5 16.6V7.4z"/><path d="m3.7 7.3 8.3 4.6 8.3-4.6M12 11.9v9.3"/></symbol>
+    <symbol id="i-trend" viewBox="0 0 24 24"><path d="m3.5 16.5 5.5-5.5 3.6 3.6 7.9-8"/><path d="M15.4 6.6h5.1v5.1"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.8"/><path d="M12 7.2v5.1l3.4 2"/></symbol>
+    <symbol id="i-send" viewBox="0 0 24 24"><path d="M21.5 2.6 10.8 13.3M21.5 2.6l-6.8 19-3.9-8.3-8.3-3.9z"/></symbol>
+    <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="7" height="7" rx="1.6"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.6"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.6"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.6"/></symbol>
+    <symbol id="i-support" viewBox="0 0 24 24"><path d="M4 15.2v-3.4a8 8 0 0 1 16 0v3.4"/><path d="M4 14.4h2.6v6H5.4A1.4 1.4 0 0 1 4 19zM20 14.4h-2.6v6h1.2A1.4 1.4 0 0 0 20 19z"/></symbol>
+    <symbol id="i-pulse" viewBox="0 0 24 24"><path d="M2.8 12.2h4l2.8 7 4.2-15.4 2.8 8.4h4.6"/></symbol>
+    <symbol id="i-building" viewBox="0 0 24 24"><path d="M4.5 21V6.4L12 3.2l7.5 3.2V21"/><path d="M2.8 21h18.4M9 11h2M13 11h2M9 15h2M13 15h2M10.4 21v-3.4h3.2V21"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 2.8 20 6v6c0 5-3.4 8.4-8 9.2C7.4 20.4 4 17 4 12V6z"/><path d="m8.8 12 2.2 2.2 4.2-4.4"/></symbol>
+    <symbol id="i-settings" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.1"/><path d="M19.2 14.6a1.5 1.5 0 0 0 .3 1.7l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.5 1.5 0 0 0-2.6 1v.3a2 2 0 1 1-4 0v-.2a1.5 1.5 0 0 0-2.6-1l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.5 1.5 0 0 0-1-2.6h-.3a2 2 0 1 1 0-4h.2a1.5 1.5 0 0 0 1-2.6l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.5 1.5 0 0 0 2.6-1v-.3a2 2 0 1 1 4 0v.2a1.5 1.5 0 0 0 2.6 1l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.5 1.5 0 0 0 1 2.6h.3a2 2 0 1 1 0 4h-.2a1.5 1.5 0 0 0-1.4.9z"/></symbol>
+    <symbol id="i-logout" viewBox="0 0 24 24"><path d="M16 16.6 20.6 12 16 7.4M20.6 12H9.4M12 3.4H6.6a2 2 0 0 0-2 2v13.2a2 2 0 0 0 2 2H12"/></symbol>
+    <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20.4 12a8.4 8.4 0 1 1-2.6-6.1"/><path d="M20.6 3.6v5h-5"/></symbol>
+    <symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 3.4 21.2 20H2.8z"/><path d="M12 9.6v4.4M12 17.1h.01"/></symbol>
+    <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.8"/><path d="M12 11.2v5M12 7.8h.01"/></symbol>
+    <symbol id="i-filter" viewBox="0 0 24 24"><path d="M3.5 5.5h17l-6.6 7.6v6l-3.8 2v-8z"/></symbol>
+    <symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 16.4V4.2M7.4 8.8 12 4.2l4.6 4.6"/><path d="M4 15.4v3.4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3.4"/></symbol>
+    <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 4v12.4M7.4 11.8 12 16.4l4.6-4.6"/><path d="M4 19.4h16"/></symbol>
+    <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2.4 12S6 5.6 12 5.6 21.6 12 21.6 12 18 18.4 12 18.4 2.4 12 2.4 12z"/><circle cx="12" cy="12" r="3.1"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24"><rect x="4.5" y="10.5" width="15" height="10.4" rx="2.2"/><path d="M8 10.5V7.8a4 4 0 0 1 8 0v2.7M12 14.6v2.6"/></symbol>
+    <symbol id="i-flag" viewBox="0 0 24 24"><path d="M5 21V4M5 4.6h11.5l-1.8 3.8 1.8 3.8H5"/></symbol>
+    <symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.6"/><circle cx="12" cy="12" r="4.6"/><circle cx="12" cy="12" r=".9"/></symbol>
+    <symbol id="i-chat" viewBox="0 0 24 24"><path d="M20.6 12.4a7.6 7.6 0 0 1-8.2 7.6c-.8 0-1.6-.1-2.3-.3L4.4 21l1.4-4.8A7.6 7.6 0 0 1 12.4 4.4a7.6 7.6 0 0 1 8.2 8z"/></symbol>
+    <symbol id="i-board" viewBox="0 0 24 24"><rect x="3.4" y="4" width="17.2" height="16" rx="2.2"/><path d="M9 4v16M15 4v16"/></symbol>
+  </svg>
+
+  <!-- =======================================================================
+       TOP NAVIGATION BAR
+       The user chip is bound to the admin record — never hardcoded.
+  ======================================================================== -->
+  <header class="topbar" id="topbar">
+    <div class="topbar__inner">
+      <button class="icon-btn topbar__burger" id="burgerBtn" type="button"
+              aria-label="Open navigation menu" aria-expanded="false" aria-controls="primaryNav">
+        <svg class="ico"><use href="#i-menu" /></svg>
+      </button>
+
+      <a class="brand" href="#/home">
+        <span class="brand__mark"><svg class="ico"><use href="#i-pulse" /></svg></span>
+        <span class="brand__text">Nexus<span>CRM</span></span>
+      </a>
+
+      <nav class="mainnav" id="primaryNav" aria-label="Primary navigation">
+        <ul class="mainnav__list" id="navList"><!-- rendered by script.js --></ul>
+      </nav>
+
+      <div class="topbar__actions">
+        <!-- Create dropdown -->
+        <div class="dropdown" data-dropdown>
+          <button class="btn btn--create" type="button" data-dropdown-toggle aria-expanded="false" aria-haspopup="true">
+            <svg class="ico"><use href="#i-plus" /></svg>
+            <span class="btn__label">Create</span>
+            <svg class="ico ico--xs dropdown__caret"><use href="#i-chevron" /></svg>
+          </button>
+          <div class="dropdown__menu dropdown__menu--right" role="menu" data-dropdown-menu hidden>
+            <p class="dropdown__title">Quick create</p>
+            <button class="dropdown__item" role="menuitem" type="button" data-action="new:tasks">
+              <svg class="ico"><use href="#i-task" /></svg> Task</button>
+            <button class="dropdown__item" role="menuitem" type="button" data-action="new:meetings">
+              <svg class="ico"><use href="#i-video" /></svg> Meeting</button>
+            <button class="dropdown__item" role="menuitem" type="button" data-action="new:notes">
+              <svg class="ico"><use href="#i-note" /></svg> Note</button>
+            <button class="dropdown__item" role="menuitem" type="button" data-action="new:emails">
+              <svg class="ico"><use href="#i-mail" /></svg> Email</button>
+            <button class="dropdown__item" role="menuitem" type="button" data-action="new:calls">
+              <svg class="ico"><use href="#i-phone" /></svg> Call log</button>
+            <div class="dropdown__sep" role="separator"></div>
+            <button class="dropdown__item" role="menuitem" type="button" data-action="new-contact">
+              <svg class="ico"><use href="#i-user" /></svg> Contact</button>
+            <button class="dropdown__item" role="menuitem" type="button" data-action="new:opportunities">
+              <svg class="ico"><use href="#i-bulb" /></svg> Deal</button>
+            <button class="dropdown__item" role="menuitem" type="button" data-action="new:cases">
+              <svg class="ico"><use href="#i-support" /></svg> Support ticket</button>
+          </div>
+        </div>
+
+        <!-- Global search -->
+        <div class="search" id="search">
+          <button class="icon-btn" id="searchToggle" type="button" aria-label="Open search"
+                  aria-expanded="false" aria-controls="searchPanel">
+            <svg class="ico"><use href="#i-search" /></svg>
+          </button>
+          <div class="search__panel" id="searchPanel" hidden>
+            <form class="search__form" id="searchForm" role="search" autocomplete="off">
+              <svg class="ico search__icon"><use href="#i-search" /></svg>
+              <input class="search__input" id="searchInput" type="search" name="q"
+                     placeholder="Search contacts, deals, tickets, records…" aria-label="Search the CRM"
+                     aria-controls="searchResults" aria-expanded="false" role="combobox" />
+              <button class="icon-btn icon-btn--sm" id="searchClose" type="button" aria-label="Close search">
+                <svg class="ico"><use href="#i-close" /></svg>
+              </button>
+            </form>
+            <ul class="search__results" id="searchResults" role="listbox" aria-label="Search results" hidden></ul>
+          </div>
+        </div>
+
+        <!-- Notifications -->
+        <div class="dropdown" data-dropdown>
+          <button class="icon-btn icon-btn--badge" type="button" data-dropdown-toggle aria-expanded="false"
+                  aria-haspopup="true" aria-label="Notifications">
+            <svg class="ico"><use href="#i-bell" /></svg>
+            <span class="badge" id="notifBadge" hidden>0</span>
+          </button>
+          <div class="dropdown__menu dropdown__menu--right dropdown__menu--wide" data-dropdown-menu hidden>
+            <div class="dropdown__head">
+              <p class="dropdown__title">Notifications</p>
+              <div class="dropdown__head-actions">
+                <button class="link-btn" type="button" id="markAllRead">Mark all read</button>
+                <button class="link-btn link-btn--mute" type="button" id="clearNotifs">Clear</button>
+              </div>
+            </div>
+            <ul class="notif-list" id="notifList"></ul>
+          </div>
+        </div>
+
+        <!-- Admin profile -->
+        <div class="dropdown" data-dropdown>
+          <button class="userchip" type="button" data-dropdown-toggle aria-expanded="false" aria-haspopup="true">
+            <span class="avatar avatar--sm" id="adminAvatar">AC</span>
+            <span class="userchip__meta">
+              <span class="userchip__name" id="adminName">Adrian Cole</span>
+              <span class="userchip__role" id="adminRole">Administrator</span>
+            </span>
+            <svg class="ico ico--xs dropdown__caret"><use href="#i-chevron" /></svg>
+          </button>
+          <div class="dropdown__menu dropdown__menu--right" role="menu" data-dropdown-menu hidden>
+            <div class="dropdown__user">
+              <span class="avatar avatar--sm" id="adminAvatarMenu">AC</span>
+              <div>
+                <p class="dropdown__user-name" id="adminNameMenu">Adrian Cole</p>
+                <p class="dropdown__user-mail" id="adminMailMenu">adrian.cole@nexuscrm.io</p>
+              </div>
+            </div>
+            <div class="dropdown__sep" role="separator"></div>
+            <button class="dropdown__item" role="menuitem" type="button" data-action="admin-view">
+              <svg class="ico"><use href="#i-user" /></svg> View Profile</button>
+            <button class="dropdown__item" role="menuitem" type="button" data-action="admin-edit">
+              <svg class="ico"><use href="#i-edit" /></svg> Edit Profile</button>
+            <button class="dropdown__item" role="menuitem" type="button" data-action="admin-settings">
+              <svg class="ico"><use href="#i-settings" /></svg> Settings</button>
+            <div class="dropdown__sep" role="separator"></div>
+            <button class="dropdown__item dropdown__item--danger" role="menuitem" type="button" data-action="admin-logout">
+              <svg class="ico"><use href="#i-logout" /></svg> Logout</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-scrim" id="navScrim" hidden></div>
+  </header>
+
+  <!-- =======================================================================
+       APPLICATION VIEW — every screen is rendered here by the router
+  ======================================================================== -->
+  <main class="page" id="main">
+    <div id="view" class="view" role="region" aria-live="polite"></div>
+  </main>
+
+  <!-- Modal shell (content injected by openModal) -->
+  <div class="modal" id="modal" hidden>
+    <div class="modal__backdrop" data-modal-close></div>
+    <div class="modal__dialog" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <header class="modal__head">
+        <div class="modal__head-main">
+          <span class="modal__icon" id="modalIcon" aria-hidden="true"></span>
+          <div>
+            <h2 class="modal__title" id="modalTitle">Title</h2>
+            <p class="modal__sub" id="modalSub"></p>
+          </div>
+        </div>
+        <button class="icon-btn" type="button" data-modal-close aria-label="Close dialog">
+          <svg class="ico"><use href="#i-close" /></svg>
+        </button>
+      </header>
+      <div class="modal__body" id="modalBody"></div>
+      <footer class="modal__foot" id="modalFoot"></footer>
+    </div>
+  </div>
+
+  <!-- Sign-out screen -->
+  <div class="lock" id="lockScreen" hidden>
+    <div class="lock__card card">
+      <span class="lock__icon"><svg class="ico"><use href="#i-lock" /></svg></span>
+      <h2>You are signed out</h2>
+      <p>Your Nexus CRM session has ended. All of your data is safely stored on this device.</p>
+      <button class="btn btn--primary" type="button" id="signBackIn">
+        <svg class="ico"><use href="#i-logout" /></svg> Sign back in
+      </button>
+    </div>
+  </div>
+
+  <!-- Toast notifications -->
+  <div class="toasts" id="toasts" role="status" aria-live="polite"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>
