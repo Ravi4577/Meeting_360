@@ -480,6 +480,7 @@ mark { background: rgba(99, 102, 241, .18); color: inherit; border-radius: 3px; 
 .page__sub { font-size: 13px; color: var(--text-soft); margin-top: 4px; max-width: 68ch; }
 .page__cta { display: flex; gap: 8px; flex-wrap: wrap; }
 
+.page__back { margin-bottom: 10px; }
 .crumbs ol { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-mute); flex-wrap: wrap; }
 .crumbs li + li::before { content: "/"; margin-right: 6px; color: var(--ink-300); }
 .crumbs a { color: var(--text-mute); }
@@ -779,11 +780,44 @@ mark { background: rgba(99, 102, 241, .18); color: inherit; border-radius: 3px; 
 .kpi:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
 /* Clickable summary tiles keep the exact look of the static ones */
 button.kpi { width: 100%; text-align: left; font: inherit; color: inherit; cursor: pointer; }
+button.kpi:hover { border-color: var(--brand-200); }
+button.kpi:hover .kpi__icon { transform: scale(1.08); }
+button.kpi:hover .kpi__more { opacity: 1; transform: translateX(0); }
 .kpi__head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-.kpi__icon { width: 34px; height: 34px; border-radius: 11px; display: grid; place-items: center; background: var(--brand-50); color: var(--brand-600); }
+.kpi__icon {
+  width: 34px; height: 34px; border-radius: 11px; display: grid; place-items: center;
+  background: var(--acc-soft, var(--brand-50)); color: var(--acc, var(--brand-600));
+  transition: transform var(--t-fast);
+}
 .kpi__label { font-size: 11px; color: var(--text-mute); text-transform: uppercase; letter-spacing: .06em; }
-.kpi__value { font-size: 22px; font-weight: 600; margin-top: 6px; }
+.kpi__value { font-size: 22px; font-weight: 600; margin-top: 6px; line-height: 1.15; }
 .kpi__note { font-size: 11.5px; color: var(--text-mute); }
+.kpi__foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 8px; }
+.kpi__trend {
+  display: inline-flex; align-items: center; gap: 4px; flex: none;
+  padding: 3px 9px; border-radius: var(--r-pill);
+  font-size: 11px; font-weight: 600; background: var(--ink-100); color: var(--text-soft);
+}
+.kpi__trend--up { background: rgba(16, 185, 129, .12); color: var(--success); }
+.kpi__trend--down { background: rgba(225, 29, 72, .1); color: var(--danger); }
+.kpi__trend--warn { background: rgba(217, 119, 6, .12); color: var(--warning); }
+.kpi__more {
+  display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 500;
+  color: var(--brand-600); opacity: 0; transform: translateX(-4px);
+  transition: opacity var(--t-fast), transform var(--t-fast);
+}
+
+/* Dashboard density: sections sit closer together than on record pages */
+.dash .section { margin-top: var(--gap); }
+.dash .section-head { margin-bottom: 12px; }
+.mini-kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+.mini {
+  padding: 13px 14px; border: 1px solid var(--border); border-radius: var(--r-md); background: var(--surface-alt);
+}
+.mini__label { font-size: 10.5px; text-transform: uppercase; letter-spacing: .06em; color: var(--text-mute); display: flex; align-items: center; gap: 6px; }
+.mini__label .ico { color: var(--acc, var(--brand-600)); }
+.mini__value { font-size: 17px; font-weight: 600; margin-top: 5px; }
+.mini__note { font-size: 11px; color: var(--text-mute); }
 
 .switch-row {
   display: flex; align-items: center; justify-content: space-between; gap: 14px;
@@ -1041,6 +1075,155 @@ button.kpi { width: 100%; text-align: left; font: inherit; color: inherit; curso
 .lock__icon .ico { width: 28px; height: 28px; }
 .lock__card h2 { font-size: 20px; }
 .lock__card p { font-size: 13px; color: var(--text-soft); margin: 10px 0 22px; }
+
+/* ======================= 17b. MEETING 360 COMPONENTS =====================
+   Additive only — new building blocks for the calendar, meeting pipeline,
+   trend bars and intelligence panel. They reuse the existing tokens, radii,
+   shadows and type scale so they sit inside the approved design language.
+   ========================================================================= */
+
+/* Meeting pipeline flow */
+.flow { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; }
+.flow__step {
+  position: relative; padding: 16px 14px; text-align: left; width: 100%;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r-md); box-shadow: var(--shadow-xs);
+  transition: transform var(--t-fast), box-shadow var(--t-fast), border-color var(--t-fast);
+}
+.flow__step:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); border-color: var(--brand-200); }
+.flow__step::after {
+  content: ""; position: absolute; right: -8px; top: 50%; z-index: 1;
+  width: 8px; height: 8px; border-top: 2px solid var(--ink-300); border-right: 2px solid var(--ink-300);
+  transform: translateY(-50%) rotate(45deg);
+}
+.flow__step:last-child::after { display: none; }
+.flow__label { font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--text-mute); display: block; }
+.flow__count { font-size: 24px; font-weight: 600; display: block; margin-top: 6px; }
+.flow__pct { font-size: 11.5px; color: var(--acc); font-weight: 500; display: block; }
+/* display:block is required — as an inline span the bar cannot take a height */
+.flow__bar { display: block; height: 5px; border-radius: var(--r-pill); background: var(--ink-100); margin-top: 10px; overflow: hidden; }
+.flow__bar span { display: block; height: 100%; border-radius: inherit; background: var(--acc); transition: width var(--t-slow); }
+
+/* Trend bar chart — columns must stretch so the % heights have a base to resolve against */
+.bars { display: flex; align-items: stretch; gap: 8px; height: 190px; padding-top: 10px; }
+.bar { flex: 1; height: 100%; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; gap: 6px; min-width: 0; }
+.bar__track { flex: 1; width: 100%; display: flex; align-items: flex-end; justify-content: center; }
+.bar__fill {
+  width: 100%; max-width: 44px; border-radius: 8px 8px 4px 4px; min-height: 4px;
+  background: linear-gradient(180deg, var(--brand-500), var(--violet-500));
+  transition: height var(--t-slow), filter var(--t-fast);
+}
+.bar--peak .bar__fill { background: linear-gradient(180deg, var(--cyan-500), var(--brand-500)); }
+.bar:hover .bar__fill { filter: brightness(1.12); }
+.bar__label { font-size: 10.5px; color: var(--text-mute); white-space: nowrap; }
+.bar__value { font-size: 11px; font-weight: 600; }
+
+/* Calendar */
+.cal { border: 1px solid var(--border); border-radius: var(--r-md); overflow: hidden; background: var(--surface); }
+.cal__grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); }
+.cal__dow {
+  padding: 10px 8px; text-align: center; background: var(--surface-alt);
+  font-size: 10.5px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--text-mute);
+  border-bottom: 1px solid var(--border);
+}
+.cal__cell {
+  min-height: 104px; padding: 8px; text-align: left; width: 100%;
+  border-right: 1px solid var(--border); border-bottom: 1px solid var(--border);
+  background: var(--surface); transition: background var(--t-fast);
+  display: flex; flex-direction: column; gap: 5px; align-items: stretch;
+}
+.cal__cell:nth-child(7n) { border-right: 0; }
+.cal__cell:hover { background: var(--brand-50); }
+.cal__cell--out { background: var(--surface-alt); color: var(--text-mute); }
+.cal__cell--today { box-shadow: inset 0 0 0 2px var(--brand-400); }
+.cal__num { font-size: 12px; font-weight: 500; }
+.cal__cell--today .cal__num { color: var(--brand-600); font-weight: 600; }
+.cal__event {
+  font-size: 10.5px; padding: 3px 7px; border-radius: 6px;
+  background: var(--acc-soft); color: var(--acc); font-weight: 500;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.cal__more { font-size: 10px; color: var(--text-mute); }
+
+.cal__day { display: grid; gap: 8px; }
+.cal__slot { display: grid; grid-template-columns: 62px minmax(0, 1fr); gap: 12px; align-items: start; }
+.cal__time { font-size: 11px; color: var(--text-mute); padding-top: 14px; font-variant-numeric: tabular-nums; }
+.cal__slot-body { border-top: 1px dashed var(--border); padding: 8px 0; min-height: 44px; display: grid; gap: 8px; }
+
+/* Intelligence panel — a normal surface card with small insight tiles */
+.ai {
+  position: relative; padding: 20px; border-radius: var(--r-lg); overflow: hidden;
+  background: var(--surface); border: 1px solid var(--border); box-shadow: var(--shadow-sm);
+}
+.ai::before {
+  content: ""; position: absolute; inset: 0 auto 0 0; width: 3px;
+  background: linear-gradient(180deg, var(--brand-500), var(--violet-500), var(--cyan-500));
+}
+.ai__head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; }
+.ai__title { display: flex; align-items: center; gap: 10px; font-size: 15px; font-weight: 600; color: var(--text); }
+.ai__title .ico { color: var(--brand-600); }
+.ai__badge {
+  display: inline-flex; align-items: center; gap: 6px; padding: 4px 11px; border-radius: var(--r-pill);
+  background: var(--brand-50); border: 1px solid var(--brand-100); color: var(--brand-700); font-size: 11px; font-weight: 500;
+}
+.ai__list { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
+.ai__item {
+  display: flex; align-items: flex-start; gap: 11px; width: 100%; text-align: left;
+  padding: 14px; border-radius: var(--r-md);
+  background: var(--surface-alt); border: 1px solid var(--border); color: var(--text);
+  transition: background var(--t-fast), border-color var(--t-fast), transform var(--t-fast), box-shadow var(--t-fast);
+}
+.ai__item:hover { background: var(--surface); border-color: var(--brand-200); transform: translateY(-2px); box-shadow: var(--shadow-xs); }
+.ai__chip {
+  width: 32px; height: 32px; flex: none; border-radius: 10px; display: grid; place-items: center;
+  background: var(--acc-soft, var(--brand-50)); color: var(--acc, var(--brand-600));
+}
+.ai__text { font-size: 12.5px; font-weight: 500; line-height: 1.45; }
+.ai__meta { font-size: 11.5px; color: var(--text-mute); display: block; margin-top: 3px; font-weight: 400; }
+.ai__foot { margin-top: 14px; display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.ai__note { font-size: 11.5px; color: var(--text-mute); margin-left: auto; }
+
+/* Two-column dashboard splits */
+.split { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: var(--gap); align-items: start; }
+.pad { padding: 20px; }
+
+/* Participant / attendee chips */
+.people { display: flex; flex-wrap: wrap; gap: 8px; }
+.person {
+  display: inline-flex; align-items: center; gap: 8px; padding: 5px 12px 5px 5px;
+  border-radius: var(--r-pill); background: var(--surface-alt); border: 1px solid var(--border); font-size: 12px;
+}
+.person--out { opacity: .6; }
+.person__name { font-weight: 500; }
+.person__role { color: var(--text-mute); font-size: 11px; }
+
+/* Numbered agenda / decision lists */
+.olist { display: grid; gap: 8px; counter-reset: olist; }
+.olist__item {
+  display: flex; gap: 10px; padding: 12px 13px; border-radius: var(--r-md);
+  background: var(--surface-alt); border: 1px solid var(--border); font-size: 12.5px;
+}
+.olist__item::before {
+  counter-increment: olist; content: counter(olist);
+  width: 22px; height: 22px; flex: none; border-radius: 50%;
+  display: grid; place-items: center; background: var(--brand-50); color: var(--brand-700);
+  font-size: 11px; font-weight: 600;
+}
+.olist__item strong { display: block; }
+.olist__item span { color: var(--text-mute); font-size: 11.5px; }
+
+@media (max-width: 1100px) { .split { grid-template-columns: 1fr; } }
+@media (max-width: 900px) {
+  .flow { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .flow__step::after { display: none; }
+  .cal__cell { min-height: 78px; padding: 6px; }
+  .cal__event { font-size: 9.5px; padding: 2px 5px; }
+}
+@media (max-width: 600px) {
+  .flow { grid-template-columns: 1fr; }
+  .bars { height: 140px; gap: 5px; }
+  .cal__slot { grid-template-columns: 52px minmax(0, 1fr); gap: 8px; }
+}
 
 /* ---------------------------- 18. ANIMATIONS ----------------------------- */
 @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
