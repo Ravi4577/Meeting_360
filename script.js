@@ -5033,9 +5033,60 @@
   }
 
   /* ======================================================================
+     19b. CRM HOST — widget popup sizing
+     ====================================================================== */
+  /**
+   * A custom-button widget opens in a small CRM popup and only the host can
+   * resize it, through the embedded-app SDK. The SDK is fetched on demand and
+   * every step is optional: outside CRM it never arrives, and the app renders
+   * exactly as it does now.
+   */
+  const ZOHO_SDK_URL = 'https://live.zwidgets.com/js-sdk/1.1/ZohoEmbededAppSDK.min.js';
+  const POPUP_SIZE = { width: '92%', height: '92%' };
+  const POPUP_SIZE_PX = { width: '1440', height: '900' };   // hosts that reject percentages
+
+  const isEmbedded = () => {
+    try { return window.top !== window.self; } catch (err) { return true; }
+  };
+
+  function loadZohoSdk() {
+    if (window.ZOHO && window.ZOHO.embeddedApp) return Promise.resolve();
+    return new Promise((resolve, reject) => {
+      const tag = document.createElement('script');
+      tag.src = ZOHO_SDK_URL;
+      tag.async = true;
+      tag.onload = () => (window.ZOHO && window.ZOHO.embeddedApp
+        ? resolve() : reject(new Error('SDK loaded without the ZOHO global')));
+      tag.onerror = () => reject(new Error('SDK could not be fetched'));
+      document.head.appendChild(tag);
+    });
+  }
+
+  function resizeCrmPopup(size) {
+    const ui = window.ZOHO && window.ZOHO.CRM && window.ZOHO.CRM.UI;
+    if (!ui || typeof ui.Resize !== 'function') return Promise.reject(new Error('CRM.UI.Resize missing'));
+    return Promise.resolve(ui.Resize(size || POPUP_SIZE))
+      .catch(() => ui.Resize(POPUP_SIZE_PX));
+  }
+
+  function fitInsideCrm() {
+    if (!isEmbedded()) return Promise.resolve();
+    return loadZohoSdk()
+      .then(() => {
+        const app = window.ZOHO.embeddedApp;
+        /* register before init, or the first PageLoad is missed */
+        if (typeof app.on === 'function') app.on('PageLoad', () => resizeCrmPopup());
+        return Promise.resolve(typeof app.init === 'function' ? app.init() : null);
+      })
+      .then(() => resizeCrmPopup())
+      .catch((err) => console.info('[Meeting 360] CRM popup resize unavailable —', err && err.message ? err.message : err));
+  }
+
+  /* ======================================================================
      20. BOOTSTRAP
      ====================================================================== */
   function init() {
+    fitInsideCrm();
     applyBrand();
     loadData();
     console.info('[Meeting 360] ' + buildStamp());
