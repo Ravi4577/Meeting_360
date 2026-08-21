@@ -5174,5 +5174,12 @@
     }, 800);
   }
 
-  document.addEventListener('DOMContentLoaded', init);
+  /* The loader in index.html injects this file once the DOM is already
+     parsed, so waiting on DOMContentLoaded alone would never fire. Boot
+     immediately when the document is ready, otherwise wait as before. */
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
 })();

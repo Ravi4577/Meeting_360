@@ -12,7 +12,110 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
 
-  <link rel="stylesheet" href="style.css" />
+  <!-- No-cache hints. Modern browsers ignore these for the document itself
+       (only real HTTP headers count, and GitHub Pages does not let us set
+       them), but they are honoured by some proxies and older clients, and
+       they cost nothing. The bootstrap below is what actually guarantees
+       freshness. -->
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+
+  <!-- =======================================================================
+       CACHE-BUSTING BOOTSTRAP
+
+       GitHub Pages serves every file with `Cache-Control: max-age=600` and
+       offers no way to override response headers. A CRM iframe therefore keeps
+       a stale index.html long after a push — and any ?v= baked into that HTML
+       goes stale with it. Renaming script.js to script.vN.js has the same flaw:
+       it only takes effect once the HTML itself refreshes.
+
+       So this file is deliberately static. It carries no version of its own and
+       never needs to change between deploys, which makes caching it harmless.
+
+       The version is resolved at runtime instead: we ask the server for
+       script.js's current ETag over a request that bypasses the browser cache
+       (`cache: 'no-store'`) *and* the CDN edge (a unique query string, so Fastly
+       treats it as a new object and goes to origin). Assets are then loaded as
+       ?v=<etag>. GitHub Pages changes that ETag on every deploy, so the URL
+       changes with it and the browser must refetch; between deploys the URL is
+       stable and stays cached normally.
+
+       If anything here fails the loader falls back to a timestamp — always
+       fresh, never cached, never a blank page.
+  ======================================================================== -->
+  <style id="bootGuard">html { visibility: hidden; }</style>
+  <script>
+  (function () {
+    'use strict';
+
+    var CSS = 'style.css';
+    var JS = 'script.js';
+    var PROBE_TIMEOUT = 3000;   /* give up on the probe, use a timestamp */
+    var REVEAL_FAILSAFE = 5000; /* never leave the page invisible */
+
+    var revealed = false;
+    function reveal() {
+      if (revealed) return;
+      revealed = true;
+      var guard = document.getElementById('bootGuard');
+      if (guard && guard.parentNode) guard.parentNode.removeChild(guard);
+    }
+    setTimeout(reveal, REVEAL_FAILSAFE);
+
+    /* Current ETag of the deployed script, fetched past every cache layer. */
+    function probe() {
+      if (typeof fetch !== 'function') return Promise.resolve(null);
+
+      var ctl = typeof AbortController === 'function' ? new AbortController() : null;
+      var timer = ctl ? setTimeout(function () { ctl.abort(); }, PROBE_TIMEOUT) : null;
+      var opts = { method: 'HEAD', cache: 'no-store' };
+      if (ctl) opts.signal = ctl.signal;
+
+      return fetch(JS + '?cb=' + Date.now(), opts)
+        .then(function (res) {
+          if (timer) clearTimeout(timer);
+          return res.headers.get('ETag') || res.headers.get('Last-Modified');
+        })
+        .catch(function () {
+          if (timer) clearTimeout(timer);
+          return null;
+        });
+    }
+
+    /* ETags arrive quoted and may be weak (W/"..."); reduce to a URL-safe token. */
+    function tokenFrom(raw) {
+      if (!raw) return String(Date.now());
+      return raw.replace(/[^A-Za-z0-9]/g, '').slice(-24) || String(Date.now());
+    }
+
+    function loadScript(version) {
+      var el = document.createElement('script');
+      el.src = JS + '?v=' + version;
+      el.onerror = reveal;
+      (document.body || document.documentElement).appendChild(el);
+    }
+
+    function load(version) {
+      var link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = CSS + '?v=' + version;
+      link.onload = reveal;
+      link.onerror = reveal;
+      document.head.appendChild(link);
+
+      /* Mirror the original end-of-<body> placement so the app still sees a
+         fully parsed DOM when it runs. */
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function () { loadScript(version); });
+      } else {
+        loadScript(version);
+      }
+    }
+
+    probe().then(function (raw) { load(tokenFrom(raw)); });
+  })();
+  </script>
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to main content</a>
@@ -249,6 +352,5 @@
   <!-- Toast notifications -->
   <div class="toasts" id="toasts" role="status" aria-live="polite"></div>
 
-  <script src="script.v13.js"></script>
 </body>
 </html>
