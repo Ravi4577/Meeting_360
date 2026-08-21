@@ -83,10 +83,12 @@
         });
     }
 
-    /* ETags arrive quoted and may be weak (W/"..."); reduce to a URL-safe token. */
+    /* Pages sends W/"..." when gzipped and "..." when not, for the same bytes.
+       Strip the weak marker first so both spellings yield one stable token. */
     function tokenFrom(raw) {
       if (!raw) return String(Date.now());
-      return raw.replace(/[^A-Za-z0-9]/g, '').slice(-24) || String(Date.now());
+      var tag = raw.indexOf('W/') === 0 ? raw.slice(2) : raw;
+      return tag.replace(/[^A-Za-z0-9]/g, '').slice(-24) || String(Date.now());
     }
 
     function loadScript(version) {
