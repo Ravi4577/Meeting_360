@@ -653,6 +653,17 @@
   const otherAddress = (c, joiner = ', ') =>
     [c.otherStreet, [c.otherCity, c.otherState, c.otherZip].filter(Boolean).join(' '), c.otherCountry].filter(Boolean).join(joiner);
 
+  /**
+   * One-line identity of the running build: which seed version it carries, how
+   * many sample contacts the code itself defines, and the host it was served
+   * from. Makes a stale cache or the wrong hosting obvious at a glance.
+   */
+  const buildStamp = () => {
+    const tag = document.querySelector('script[src*="script.js"]');
+    const asset = tag ? tag.getAttribute('src') : 'script.js';
+    return `Seed v${SEED_VERSION} · ${seedContacts().length} sample contacts in this build · ${asset} · served from ${location.host || 'file://'}`;
+  };
+
   const allRecords = (key) => DB.records[key] || [];
   const recordsFor = (key, contactId) => allRecords(key).filter((r) => r.contactId === contactId);
   const findRecord = (key, id) => allRecords(key).find((r) => r.id === id) || null;
@@ -3398,6 +3409,7 @@
               <div>
                 <p class="switch-row__text">Local storage</p>
                 <p class="switch-row__note">${DB.contacts.length} contacts · ${meetings().length} meetings · ${MODULE_ORDER.reduce((n, k) => n + allRecords(k).length, 0)} records saved on this device.</p>
+                <p class="switch-row__note">${esc(buildStamp())}</p>
               </div>
               <button class="btn btn--sm btn--ghost" type="button" data-act="reset-data">${icon('refresh', 'ico--xs')} Reset workspace</button>
             </div>
@@ -4990,6 +5002,7 @@
   function init() {
     applyBrand();
     loadData();
+    console.info('[Meeting 360] ' + buildStamp());
     migrateRelations();
     syncAdminToTeam();
     seedNotifications();
