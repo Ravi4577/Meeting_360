@@ -194,7 +194,8 @@
     { id: 'u-2', name: 'Maya Iqbal', role: 'Project Manager', department: 'Customer Success', email: 'maya.iqbal@meeting360.io', phone: '(020) 7946-0022', permission: 'Manager', status: 'Online' },
     { id: 'u-3', name: 'Tomas Vega', role: 'Solutions Engineer', department: 'Solutions', email: 'tomas.vega@meeting360.io', phone: '(020) 7946-0033', permission: 'Member', status: 'In a meeting' },
     { id: 'u-4', name: 'Sara Lindqvist', role: 'Support Lead', department: 'Support', email: 'sara.lindqvist@meeting360.io', phone: '(020) 7946-0044', permission: 'Member', status: 'Away' },
-    { id: 'u-5', name: 'Daniel Okafor', role: 'Revenue Operations', department: 'Operations', email: 'daniel.okafor@meeting360.io', phone: '(020) 7946-0055', permission: 'Viewer', status: 'Offline' }
+    { id: 'u-5', name: 'Daniel Okafor', role: 'Revenue Operations', department: 'Operations', email: 'daniel.okafor@meeting360.io', phone: '(020) 7946-0055', permission: 'Viewer', status: 'Offline' },
+    { id: 'u-6', name: 'Ravi Kumar Kushwaha', role: 'Implementation Consultant', department: 'Solutions', email: 'ravi.kushwaha@meeting360.io', phone: '(020) 7946-0066', permission: 'Member', status: 'Online' }
   ];
 
   const TITLE_BANK = {
@@ -592,7 +593,7 @@
   }
 
   /** Bumped whenever seedContacts()/seedWorkspace() gain sample data a saved workspace should pick up. */
-  const SEED_VERSION = 13;
+  const SEED_VERSION = 14;
 
   function seedData() {
     const ws = seedWorkspace();
@@ -755,6 +756,13 @@
         if (extra.length) DB.records[key] = (DB.records[key] || []).concat(extra.map(clone));
       });
     }
+
+    /* loadData() does `Object.assign(base, saved)`, so a saved team array
+       replaces the seeded one wholesale — a member added to TEAM would never
+       reach an existing workspace. Merge unseen ones by id, same as contacts. */
+    const knownTeam = new Set((DB.team || []).map((u) => u.id));
+    const newTeam = TEAM.filter((u) => !knownTeam.has(u.id));
+    if (newTeam.length) DB.team = (DB.team || []).concat(newTeam.map(clone));
 
     DB.version = SEED_VERSION;
     saveData();
