@@ -584,6 +584,9 @@
       timeline: [{ ts: Date.now(), label: 'Meeting created' }]
     });
 
+    /* re-sort: the fixture is appended after the generated history was ordered */
+    records.meetings.sort(byDateAsc);
+
     return { contacts, records };
   }
 
