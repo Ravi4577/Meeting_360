@@ -591,7 +591,7 @@
   }
 
   /** Bumped whenever seedContacts()/seedWorkspace() gain sample data a saved workspace should pick up. */
-  const SEED_VERSION = 9;
+  const SEED_VERSION = 10;
 
   function seedData() {
     const ws = seedWorkspace();
@@ -651,6 +651,7 @@
       DB.settings.integrations = Object.assign(base.settings.integrations, (saved.settings || {}).integrations || {});
       DB.records = Object.assign(base.records, saved.records || {});
       migrateSeedData(saved, seedContactList, seedRecords);
+      if (mergeFixtures(seedRecords)) saveData();
       return true;
     } catch (err) {
       console.error('[Meeting 360] Failed to read saved data, falling back to the sample workspace.', err);
@@ -680,6 +681,27 @@
   }
 
   /**
+   * Fixed sample records carry stable fx- ids, so they can be reconciled by id
+   * on every load: missing ones are added, present ones left alone. Deliberately
+   * not tied to SEED_VERSION — a workspace already stamped with the current
+   * version would otherwise never receive them. Generated records keep their
+   * regenerated ids and are never touched here.
+   */
+  function mergeFixtures(seedRecords) {
+    let added = 0;
+    Object.keys(seedRecords).forEach((key) => {
+      const have = new Set((DB.records[key] || []).map((r) => r.id));
+      const extra = (seedRecords[key] || [])
+        .filter((r) => String(r.id).indexOf('fx-') === 0 && !have.has(r.id));
+      if (extra.length) {
+        DB.records[key] = (DB.records[key] || []).concat(extra.map(clone));
+        added += extra.length;
+      }
+    });
+    return added;
+  }
+
+  /**
    * Brings an older saved workspace up to SEED_VERSION. Any sample contact added
    * to seedContacts() since the save is merged in together with the sample records
    * that belong to it, so the new profile is populated instead of empty. Anything
@@ -699,15 +721,6 @@
         if (extra.length) DB.records[key] = (DB.records[key] || []).concat(extra.map(clone));
       });
     }
-
-    /* Fixed fixtures carry stable fx- ids, so they can be merged by id without
-       duplicating the generated records, whose ids are regenerated every load. */
-    Object.keys(seedRecords).forEach((key) => {
-      const have = new Set((DB.records[key] || []).map((r) => r.id));
-      const extra = (seedRecords[key] || [])
-        .filter((r) => String(r.id).indexOf('fx-') === 0 && !have.has(r.id));
-      if (extra.length) DB.records[key] = (DB.records[key] || []).concat(extra.map(clone));
-    });
 
     DB.version = SEED_VERSION;
     saveData();
