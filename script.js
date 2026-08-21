@@ -389,6 +389,24 @@
         preferredSlot: 'Thu & Fri, 16:00–18:00 IST', doNotCall: false, emailOptOut: false,
         tags: ['Sports & Media', 'Sponsorship', 'Demo'],
         createdAt: '2026-08-21', updatedAt: todayISO()
+      },
+      {
+        id: 'c-9', firstName: 'MS', lastName: 'Dhoni', jobTitle: 'Head of Regional Operations',
+        department: 'Operations', accountName: 'Eastgate Cold Chain',
+        email: 'ms.dhoni@eastgatecold.example', secondaryEmail: '',
+        mobile: '+91 94318 60572', officePhone: '+91 651 224 7180', fax: '',
+        street: 'Warehouse 3, Namkum Industrial Estate', city: 'Ranchi', state: 'JH', zip: '834010', country: 'India',
+        otherStreet: 'Block C, Salt Lake Sector V', otherCity: 'Kolkata',
+        otherState: 'WB', otherZip: '700091', otherCountry: 'India',
+        description: 'Coordinates cold-chain logistics across the eastern depots. Wants offline-capable check-ins for field teams.',
+        favourite: false, owner: CURRENT_USER.name, reportsTo: 'Ipsita Nandy (COO)',
+        leadSource: 'Inbound — Logistics webinar', industry: 'Cold Chain & Logistics',
+        employees: '1,250', annualRevenue: '₹365M', timezone: '(GMT+05:30) India',
+        language: 'English (IN)', linkedin: 'linkedin.com/in/msdhoni-demo',
+        lifecycle: 'Prospect — Evaluation', engagement: 52,
+        preferredSlot: 'Tue–Thu, 09:30–12:00 IST', doNotCall: false, emailOptOut: false,
+        tags: ['Logistics', 'Cold Chain', 'Demo'],
+        createdAt: '2026-08-21', updatedAt: todayISO()
       }
     ];
   }
@@ -531,7 +549,7 @@
   }
 
   /** Bumped whenever seedContacts()/seedWorkspace() gain sample data a saved workspace should pick up. */
-  const SEED_VERSION = 6;
+  const SEED_VERSION = 7;
 
   function seedData() {
     const ws = seedWorkspace();
