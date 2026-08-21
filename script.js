@@ -409,6 +409,23 @@
         preferredSlot: 'Tue & Thu, 10:00–12:00 IST', doNotCall: false, emailOptOut: false,
         tags: ['Pharma', 'Compliance', 'Validation'],
         createdAt: '2026-08-21', updatedAt: todayISO()
+      },
+      {
+        id: 'c-12', firstName: 'Narendra', lastName: 'Modi', jobTitle: 'Director of Public Sector Partnerships',
+        department: 'Public Sector', accountName: 'Bharat Civic Infrastructure',
+        email: 'narendra.modi@bharatcivic.example', secondaryEmail: '',
+        mobile: '+91 98110 24680', officePhone: '+91 11 2301 4400', fax: '',
+        street: '14 Rajpath Marg', city: 'New Delhi', state: 'DL', zip: '110001', country: 'India',
+        otherStreet: '', otherCity: '', otherState: '', otherZip: '', otherCountry: '',
+        description: 'Coordinates multi-state rollouts. Wants a single reporting view across regional programmes before committing.',
+        favourite: false, owner: 'Maya Iqbal', reportsTo: 'Board of Directors',
+        leadSource: 'Government tender portal', industry: 'Public Sector & Infrastructure',
+        employees: '4,300', annualRevenue: '₹780M', timezone: '(GMT+05:30) India',
+        language: 'English (IN)', linkedin: 'linkedin.com/in/narendra-modi',
+        lifecycle: 'Prospect — Requirements gathering', engagement: 38,
+        preferredSlot: 'Weekday afternoons IST', doNotCall: false, emailOptOut: false,
+        tags: ['Public Sector', 'Multi-region'],
+        createdAt: '2026-08-22', updatedAt: todayISO()
       }
     ];
   }
@@ -575,7 +592,7 @@
   }
 
   /** Bumped whenever seedContacts()/seedWorkspace() gain sample data a saved workspace should pick up. */
-  const SEED_VERSION = 12;
+  const SEED_VERSION = 13;
 
   function seedData() {
     const ws = seedWorkspace();
