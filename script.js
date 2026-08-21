@@ -250,40 +250,6 @@
   function seedContacts() {
     return [
       {
-        id: 'c-1', firstName: 'Lilian', lastName: 'Marron', jobTitle: 'Senior Product Manager',
-        department: '', accountName: 'MTM Investment Bank FSB',
-        email: 'info.section.im@example.de', secondaryEmail: 'l.marron@mtm-bank.example',
-        mobile: '(048) 284-6148', officePhone: '(144) 755-1854', fax: '',
-        street: '9 IBM Path', city: 'St. Petersburg', state: 'CA', zip: '79297', country: 'USA',
-        otherStreet: '', otherCity: '', otherState: '', otherZip: '', otherCountry: '',
-        description: 'Executive sponsor for the analytics rollout across three regional teams.',
-        favourite: true, owner: CURRENT_USER.name, reportsTo: 'Denise Whitaker (VP Product)',
-        leadSource: 'Webinar — Q2 Product Clinic', industry: 'Financial Services',
-        employees: '2,400', annualRevenue: '₹1.2B', timezone: '(GMT-05:00) Eastern Time',
-        language: 'English (US)', linkedin: 'linkedin.com/in/lilian-marron',
-        lifecycle: 'Customer — Expansion', engagement: 78,
-        preferredSlot: 'Tue–Thu, 09:00–12:00', doNotCall: false, emailOptOut: false,
-        tags: ['VIP', 'Renewal Q3', 'Enterprise'],
-        createdAt: '2019-02-12', updatedAt: todayISO()
-      },
-      {
-        id: 'c-2', firstName: 'Marcus', lastName: 'Feld', jobTitle: 'Director of Operations',
-        department: 'Operations', accountName: 'Halden Logistics Group',
-        email: 'm.feld@halden.example', secondaryEmail: '',
-        mobile: '(021) 774-3390', officePhone: '(021) 774-3300', fax: '',
-        street: '18 Harbour Row', city: 'Rotterdam', state: 'ZH', zip: '3011', country: 'Netherlands',
-        otherStreet: '', otherCity: '', otherState: '', otherZip: '', otherCountry: '',
-        description: 'Evaluating the platform for a 40-site logistics rollout.',
-        favourite: false, owner: CURRENT_USER.name, reportsTo: 'Board of Directors',
-        leadSource: 'Inbound — Pricing page', industry: 'Transport & Logistics',
-        employees: '860', annualRevenue: '₹310M', timezone: '(GMT+01:00) Amsterdam',
-        language: 'English (UK)', linkedin: 'linkedin.com/in/marcus-feld',
-        lifecycle: 'Prospect — Evaluation', engagement: 54,
-        preferredSlot: 'Mon & Wed afternoons', doNotCall: false, emailOptOut: false,
-        tags: ['Prospect', 'Logistics'],
-        createdAt: '2026-05-04', updatedAt: todayISO()
-      },
-      {
         id: 'c-3', firstName: 'Priya', lastName: 'Raman', jobTitle: 'Head of Data',
         department: 'Data & Insights', accountName: 'Corvus Analytics',
         email: 'priya.raman@corvus.example', secondaryEmail: '',
@@ -609,7 +575,7 @@
   }
 
   /** Bumped whenever seedContacts()/seedWorkspace() gain sample data a saved workspace should pick up. */
-  const SEED_VERSION = 11;
+  const SEED_VERSION = 12;
 
   function seedData() {
     const ws = seedWorkspace();
@@ -626,7 +592,7 @@
         notify: { reminders: true, reschedules: true, actionItems: true, followUps: true, digest: false },
         integrations: { google: true, outlook: false, zoom: true, teams: false }
       },
-      activeContactId: 'c-1',
+      activeContactId: 'c-3',
       contacts: ws.contacts,
       records: ws.records,
       team: clone(TEAM),
@@ -669,7 +635,8 @@
       DB.settings.integrations = Object.assign(base.settings.integrations, (saved.settings || {}).integrations || {});
       DB.records = Object.assign(base.records, saved.records || {});
       migrateSeedData(saved, seedContactList, seedRecords);
-      if (mergeFixtures(seedRecords)) saveData();
+      const reconciled = mergeFixtures(seedRecords) + pruneRetiredContacts();
+      if (reconciled) saveData();
       return true;
     } catch (err) {
       console.error('[Meeting 360] Failed to read saved data, falling back to the sample workspace.', err);
@@ -696,6 +663,38 @@
     DB = seedData();
     seedNotifications();
     saveData();
+  }
+
+  /**
+   * Sample contacts dropped from seedContacts() after workspaces were already
+   * saved. Listed explicitly so a contact the user created is never mistaken for
+   * a retired one — those carry generated uid('c') ids and cannot collide.
+   */
+  const RETIRED_CONTACT_IDS = ['c-1', 'c-2'];
+
+  /**
+   * Removes retired sample contacts and every record hanging off them. Runs on
+   * every load rather than behind SEED_VERSION, so a workspace already stamped
+   * at the current version is still cleaned. Idempotent: removing what has
+   * already gone is a no-op.
+   */
+  function pruneRetiredContacts() {
+    const retired = new Set(RETIRED_CONTACT_IDS);
+    let removed = 0;
+
+    const kept = DB.contacts.filter((c) => !retired.has(c.id));
+    removed += DB.contacts.length - kept.length;
+    DB.contacts = kept;
+
+    Object.keys(DB.records).forEach((key) => {
+      const list = DB.records[key] || [];
+      const keptRecords = list.filter((r) => !retired.has(r.contactId));
+      removed += list.length - keptRecords.length;
+      DB.records[key] = keptRecords;
+    });
+
+    if (retired.has(DB.activeContactId)) DB.activeContactId = (DB.contacts[0] || {}).id || null;
+    return removed;
   }
 
   /**
