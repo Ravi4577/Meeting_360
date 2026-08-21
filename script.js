@@ -407,6 +407,24 @@
         preferredSlot: 'Tue–Thu, 09:30–12:00 IST', doNotCall: false, emailOptOut: false,
         tags: ['Logistics', 'Cold Chain', 'Demo'],
         createdAt: '2026-08-21', updatedAt: todayISO()
+      },
+      {
+        id: 'c-10', firstName: 'Rohit', lastName: 'Sharma', jobTitle: 'General Manager — Retail Banking',
+        department: 'Retail Banking', accountName: 'Westline Cooperative Bank',
+        email: 'rohit.sharma@westlinebank.example', secondaryEmail: '',
+        mobile: '+91 98204 51163', officePhone: '+91 22 3399 7040', fax: '',
+        street: '12th Floor, Express Towers, Nariman Point', city: 'Mumbai', state: 'MH', zip: '400021', country: 'India',
+        otherStreet: 'Plot 8, Sector 30A, Vashi', otherCity: 'Navi Mumbai',
+        otherState: 'MH', otherZip: '400703', otherCountry: 'India',
+        description: 'Piloting the platform for branch relationship managers. Needs an audit trail on every customer interaction.',
+        favourite: true, owner: 'Maya Iqbal', reportsTo: 'Farida Contractor (Executive Director)',
+        leadSource: 'Partner referral', industry: 'Banking & Financial Services',
+        employees: '4,400', annualRevenue: '₹880M', timezone: '(GMT+05:30) India',
+        language: 'English (IN)', linkedin: 'linkedin.com/in/rohitsharma-demo',
+        lifecycle: 'Customer — Onboarding', engagement: 58,
+        preferredSlot: 'Mon & Wed, 11:00–13:00 IST', doNotCall: false, emailOptOut: false,
+        tags: ['Banking', 'Compliance', 'Demo'],
+        createdAt: '2026-08-21', updatedAt: todayISO()
       }
     ];
   }
@@ -549,7 +567,7 @@
   }
 
   /** Bumped whenever seedContacts()/seedWorkspace() gain sample data a saved workspace should pick up. */
-  const SEED_VERSION = 7;
+  const SEED_VERSION = 8;
 
   function seedData() {
     const ws = seedWorkspace();
