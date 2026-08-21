@@ -2481,7 +2481,7 @@
           ${p.openFollowUps ? `<span class="pill pill--warn">${p.openFollowUps} follow-up${p.openFollowUps === 1 ? '' : 's'}</span>` : '<span class="pill pill--ok">No open follow-ups</span>'}
         </div>
         <div class="ccard__foot">
-          <button class="btn btn--sm btn--danger" type="button" data-act="open-contact" data-id="${esc(c.id)}">${icon('eye', 'ico--xs')} View</button>
+          <button class="btn btn--sm btn--primary" type="button" data-act="open-contact" data-id="${esc(c.id)}">${icon('eye', 'ico--xs')} View</button>
           <button class="btn btn--sm btn--ghost" type="button" data-act="schedule-for" data-id="${esc(c.id)}">${icon('video', 'ico--xs')} Meet</button>
           <button class="icon-btn icon-btn--sm icon-btn--light is-danger" type="button" title="Delete contact"
                   data-act="delete-contact" data-id="${esc(c.id)}">${icon('trash', 'ico--xs')}</button>
