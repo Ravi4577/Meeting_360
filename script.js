@@ -425,6 +425,24 @@
         preferredSlot: 'Mon & Wed, 11:00–13:00 IST', doNotCall: false, emailOptOut: false,
         tags: ['Banking', 'Compliance', 'Demo'],
         createdAt: '2026-08-21', updatedAt: todayISO()
+      },
+      {
+        id: 'c-11', firstName: 'Rahul', lastName: 'Parmar', jobTitle: 'Head of Quality Assurance',
+        department: 'Quality Assurance', accountName: 'Aster Pharma Labs',
+        email: 'rahul.parmar@asterpharma.example', secondaryEmail: '',
+        mobile: '+91 99786 30244', officePhone: '+91 79 4890 5500', fax: '',
+        street: 'Unit 12, Sanand GIDC Estate', city: 'Ahmedabad', state: 'GJ', zip: '382110', country: 'India',
+        otherStreet: 'Block 4, Alembic Business Park, Gorwa', otherCity: 'Vadodara',
+        otherState: 'GJ', otherZip: '390003', otherCountry: 'India',
+        description: 'Needs validated audit records before the platform can touch batch documentation. Compliance sign-off gates the rollout.',
+        favourite: false, owner: 'Sara Lindqvist', reportsTo: 'Dr. Meera Joshi (VP Quality)',
+        leadSource: 'Trade show — PharmaTech India', industry: 'Pharmaceuticals',
+        employees: '2,700', annualRevenue: '₹520M', timezone: '(GMT+05:30) India',
+        language: 'English (IN)', linkedin: 'linkedin.com/in/rahul-parmar',
+        lifecycle: 'Prospect — Validation review', engagement: 41,
+        preferredSlot: 'Tue & Thu, 10:00–12:00 IST', doNotCall: false, emailOptOut: false,
+        tags: ['Pharma', 'Compliance', 'Validation'],
+        createdAt: '2026-08-21', updatedAt: todayISO()
       }
     ];
   }
@@ -591,7 +609,7 @@
   }
 
   /** Bumped whenever seedContacts()/seedWorkspace() gain sample data a saved workspace should pick up. */
-  const SEED_VERSION = 10;
+  const SEED_VERSION = 11;
 
   function seedData() {
     const ws = seedWorkspace();
