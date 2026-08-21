@@ -299,6 +299,60 @@
         preferredSlot: 'Weekday mornings IST', doNotCall: false, emailOptOut: false,
         tags: ['Champion', 'Expansion'],
         createdAt: '2025-11-02', updatedAt: todayISO()
+      },
+      {
+        id: 'c-4', firstName: 'Sidhart', lastName: 'Sharma', jobTitle: 'VP of Customer Success',
+        department: 'Customer Success', accountName: 'Meridian Retail Solutions',
+        email: 'sidhart.sharma@meridianretail.example', secondaryEmail: 's.sharma@meridian.example',
+        mobile: '+91 98735 21460', officePhone: '+91 124 456 7820', fax: '+91 124 456 7899',
+        street: '402, Cyber Greens, DLF Phase 3', city: 'Gurugram', state: 'HR', zip: '122002', country: 'India',
+        otherStreet: '7th Floor, Prestige Trade Tower, Palace Road', otherCity: 'Bengaluru',
+        otherState: 'KA', otherZip: '560001', otherCountry: 'India',
+        description: 'Owns post-sale adoption for the retail vertical. Requested a quarterly success review cadence.',
+        favourite: false, owner: CURRENT_USER.name, reportsTo: 'Anita Kulkarni (Chief Customer Officer)',
+        leadSource: 'Learning Saturday demo', industry: 'Retail & E-commerce',
+        employees: '3,600', annualRevenue: '₹640M', timezone: '(GMT+05:30) India',
+        language: 'English (IN)', linkedin: 'linkedin.com/in/sidhart-sharma',
+        lifecycle: 'Customer — Adoption', engagement: 61,
+        preferredSlot: 'Wed–Fri, 14:00–17:00 IST', doNotCall: false, emailOptOut: false,
+        tags: ['Retail', 'Success Review', 'Enterprise'],
+        createdAt: '2026-08-21', updatedAt: todayISO()
+      },
+      {
+        id: 'c-5', firstName: 'Pranay', lastName: 'G', jobTitle: 'Director of Platform Engineering',
+        department: 'Engineering', accountName: 'Nimbus Health Systems',
+        email: 'pranay.g@nimbushealth.example', secondaryEmail: 'p.g@nimbus.example',
+        mobile: '+91 90042 17835', officePhone: '+91 40 6688 2100', fax: '',
+        street: '11th Floor, Amara Block, HITEC City', city: 'Hyderabad', state: 'TS', zip: '500081', country: 'India',
+        otherStreet: 'Unit 6, Sunrise Business Park, Andheri East', otherCity: 'Mumbai',
+        otherState: 'MH', otherZip: '400069', otherCountry: 'India',
+        description: 'Runs the platform team piloting our API across two hospital networks. Security review is his gate before rollout.',
+        favourite: true, owner: 'Tomas Vega', reportsTo: 'Ravi Menon (CTO)',
+        leadSource: 'Conference — HealthTech Summit', industry: 'Healthcare Technology',
+        employees: '5,200', annualRevenue: '₹1.05B', timezone: '(GMT+05:30) India',
+        language: 'English (IN)', linkedin: 'linkedin.com/in/pranay-g',
+        lifecycle: 'Prospect — Security review', engagement: 47,
+        preferredSlot: 'Mon & Thu, 10:00–13:00 IST', doNotCall: false, emailOptOut: false,
+        tags: ['Healthcare', 'Security Review', 'Pilot'],
+        createdAt: '2026-08-21', updatedAt: todayISO()
+      },
+      {
+        id: 'c-6', firstName: 'Ravi', lastName: 'Maurya', jobTitle: 'Head of Procurement',
+        department: 'Procurement', accountName: 'Sundara Manufacturing Ltd',
+        email: 'ravi.maurya@sundaramfg.example', secondaryEmail: '',
+        mobile: '+91 88267 40913', officePhone: '+91 22 4972 6600', fax: '+91 22 4972 6699',
+        street: 'Plot 24, MIDC Industrial Area, Chakan', city: 'Pune', state: 'MH', zip: '410501', country: 'India',
+        otherStreet: 'Sundara House, 14 Barakhamba Road', otherCity: 'New Delhi',
+        otherState: 'DL', otherZip: '110001', otherCountry: 'India',
+        description: 'Owns the commercial paperwork for the plant rollout. Wants a three-year pricing lock before signature.',
+        favourite: false, owner: 'Maya Iqbal', reportsTo: 'Vikram Sundaram (Managing Director)',
+        leadSource: 'Outbound — Plant modernisation campaign', industry: 'Industrial Manufacturing',
+        employees: '7,800', annualRevenue: '₹2.4B', timezone: '(GMT+05:30) India',
+        language: 'English (IN)', linkedin: 'linkedin.com/in/ravi-maurya',
+        lifecycle: 'Prospect — Negotiation', engagement: 38,
+        preferredSlot: 'Tue & Fri, 11:00–13:00 IST', doNotCall: false, emailOptOut: false,
+        tags: ['Manufacturing', 'Procurement', 'Pricing'],
+        createdAt: '2026-08-21', updatedAt: todayISO()
       }
     ];
   }
@@ -440,10 +494,13 @@
     return { contacts, records };
   }
 
+  /** Bumped whenever seedContacts()/seedWorkspace() gain sample data a saved workspace should pick up. */
+  const SEED_VERSION = 4;
+
   function seedData() {
     const ws = seedWorkspace();
     return {
-      version: 1,
+      version: SEED_VERSION,
       admin: {
         teamId: CURRENT_USER.teamId, name: CURRENT_USER.name, email: CURRENT_USER.email,
         role: CURRENT_USER.role, initials: CURRENT_USER.initials, avatar: CURRENT_USER.avatar
@@ -489,12 +546,15 @@
       if (!saved || !Array.isArray(saved.contacts) || !saved.contacts.length) return false;
 
       const base = seedData();
+      const seedContactList = base.contacts;
+      const seedRecords = Object.assign({}, base.records);
       DB = Object.assign(base, saved);
       DB.admin = Object.assign(base.admin, saved.admin || {});
       DB.settings = Object.assign(base.settings, saved.settings || {});
       DB.settings.notify = Object.assign(base.settings.notify, (saved.settings || {}).notify || {});
       DB.settings.integrations = Object.assign(base.settings.integrations, (saved.settings || {}).integrations || {});
       DB.records = Object.assign(base.records, saved.records || {});
+      migrateSeedData(saved, seedContactList, seedRecords);
       return true;
     } catch (err) {
       console.error('[Meeting 360] Failed to read saved data, falling back to the sample workspace.', err);
@@ -520,6 +580,31 @@
     } catch (err) { /* storage may be blocked; resetting memory is enough */ }
     DB = seedData();
     seedNotifications();
+    saveData();
+  }
+
+  /**
+   * Brings an older saved workspace up to SEED_VERSION. Any sample contact added
+   * to seedContacts() since the save is merged in together with the sample records
+   * that belong to it, so the new profile is populated instead of empty. Anything
+   * the user created is left exactly as it was.
+   */
+  function migrateSeedData(saved, seedContactList, seedRecords) {
+    if ((saved.version || 0) >= SEED_VERSION) return;
+
+    const known = new Set(DB.contacts.map((c) => c.id));
+    const added = seedContactList.filter((c) => !known.has(c.id));
+
+    if (added.length) {
+      DB.contacts = DB.contacts.concat(added.map(clone));
+      const addedIds = new Set(added.map((c) => c.id));
+      Object.keys(seedRecords).forEach((key) => {
+        const extra = (seedRecords[key] || []).filter((r) => addedIds.has(r.contactId));
+        if (extra.length) DB.records[key] = (DB.records[key] || []).concat(extra.map(clone));
+      });
+    }
+
+    DB.version = SEED_VERSION;
     saveData();
   }
 
