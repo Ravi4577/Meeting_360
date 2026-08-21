@@ -91,20 +91,32 @@
       return tag.replace(/[^A-Za-z0-9]/g, '').slice(-24) || String(Date.now());
     }
 
+    /* A ?v= buster was blamed once for the CRM embed going blank (never
+       confirmed). If a versioned URL fails to load we retry the plain
+       filename, so this can never end up worse than static refs. */
     function loadScript(version) {
       var el = document.createElement('script');
-      el.src = JS + '?v=' + version;
-      el.onerror = reveal;
+      el.src = version ? JS + '?v=' + version : JS;
+      el.onerror = function () {
+        reveal();
+        if (version) loadScript(null);
+      };
       (document.body || document.documentElement).appendChild(el);
     }
 
-    function load(version) {
+    function loadCss(version) {
       var link = document.createElement('link');
       link.rel = 'stylesheet';
-      link.href = CSS + '?v=' + version;
+      link.href = version ? CSS + '?v=' + version : CSS;
       link.onload = reveal;
-      link.onerror = reveal;
+      link.onerror = function () {
+        if (version) loadCss(null); else reveal();
+      };
       document.head.appendChild(link);
+    }
+
+    function load(version) {
+      loadCss(version);
 
       /* Mirror the original end-of-<body> placement so the app still sees a
          fully parsed DOM when it runs. */
