@@ -371,6 +371,24 @@
         preferredSlot: 'Mon–Wed, 15:00–18:00 IST', doNotCall: false, emailOptOut: false,
         tags: ['EdTech', 'Co-marketing', 'Expansion'],
         createdAt: '2026-08-21', updatedAt: todayISO()
+      },
+      {
+        id: 'c-8', firstName: 'Virat', lastName: 'Kohli', jobTitle: 'Director of Brand Partnerships',
+        department: 'Brand & Sponsorships', accountName: 'Southbank Sports Media',
+        email: 'virat.kohli@southbanksports.example', secondaryEmail: '',
+        mobile: '+91 99001 27418', officePhone: '+91 22 6789 4400', fax: '',
+        street: 'Level 9, Trident Business Park, Lower Parel', city: 'Mumbai', state: 'MH', zip: '400013', country: 'India',
+        otherStreet: 'Suite 210, Orion Arena, Sector 44', otherCity: 'Gurugram',
+        otherState: 'HR', otherZip: '122003', otherCountry: 'India',
+        description: 'Reviewing the platform for sponsor reporting across three leagues. Wants a media-rights dashboard in the pilot.',
+        favourite: false, owner: 'Daniel Okafor', reportsTo: 'Neel Bhatia (Chief Revenue Officer)',
+        leadSource: 'Event — Sponsorship summit', industry: 'Sports & Media',
+        employees: '640', annualRevenue: '₹280M', timezone: '(GMT+05:30) India',
+        language: 'English (IN)', linkedin: 'linkedin.com/in/vkohli-demo',
+        lifecycle: 'Prospect — Discovery', engagement: 44,
+        preferredSlot: 'Thu & Fri, 16:00–18:00 IST', doNotCall: false, emailOptOut: false,
+        tags: ['Sports & Media', 'Sponsorship', 'Demo'],
+        createdAt: '2026-08-21', updatedAt: todayISO()
       }
     ];
   }
@@ -513,7 +531,7 @@
   }
 
   /** Bumped whenever seedContacts()/seedWorkspace() gain sample data a saved workspace should pick up. */
-  const SEED_VERSION = 5;
+  const SEED_VERSION = 6;
 
   function seedData() {
     const ws = seedWorkspace();
