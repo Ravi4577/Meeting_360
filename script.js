@@ -563,11 +563,32 @@
     }
 
     records.meetings.sort(byDateAsc);
+    /* A fixed booking, kept out of the random history so it is always present:
+       tomorrow 09:00-10:00, Tanuj Sharma with Sidhart Sharma. Ids prefixed fx-
+       are merged into already-saved workspaces by migrateSeedData(). */
+    const host = contacts.find((c) => c.id === 'c-4') || contacts[0];
+    records.meetings.push({
+      id: 'fx-learning-session',
+      title: 'Learning session', type: 'Onboarding',
+      date: daysFromNow(1), time: '09:00', duration: 60,
+      status: 'Confirmed', organizer: CURRENT_USER.name, organizerId: CURRENT_USER.teamId,
+      location: 'Video call', contactId: host.id,
+      participants: [
+        { name: CURRENT_USER.name, role: 'Internal', email: CURRENT_USER.email, attended: null },
+        { name: `${host.firstName} ${host.lastName}`, role: 'Customer', email: host.email, attended: null }
+      ],
+      agenda: ['Learning session'],
+      summary: '', decisions: [], keyPoints: [],
+      sentiment: null, satisfaction: null, reminder: 15,
+      createdTs: Date.now(),
+      timeline: [{ ts: Date.now(), label: 'Meeting created' }]
+    });
+
     return { contacts, records };
   }
 
   /** Bumped whenever seedContacts()/seedWorkspace() gain sample data a saved workspace should pick up. */
-  const SEED_VERSION = 8;
+  const SEED_VERSION = 9;
 
   function seedData() {
     const ws = seedWorkspace();
@@ -675,6 +696,15 @@
         if (extra.length) DB.records[key] = (DB.records[key] || []).concat(extra.map(clone));
       });
     }
+
+    /* Fixed fixtures carry stable fx- ids, so they can be merged by id without
+       duplicating the generated records, whose ids are regenerated every load. */
+    Object.keys(seedRecords).forEach((key) => {
+      const have = new Set((DB.records[key] || []).map((r) => r.id));
+      const extra = (seedRecords[key] || [])
+        .filter((r) => String(r.id).indexOf('fx-') === 0 && !have.has(r.id));
+      if (extra.length) DB.records[key] = (DB.records[key] || []).concat(extra.map(clone));
+    });
 
     DB.version = SEED_VERSION;
     saveData();
