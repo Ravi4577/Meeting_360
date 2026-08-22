@@ -515,34 +515,14 @@
       timeline: [{ ts: Date.now(), label: 'Meeting created' }]
     });
 
-    /* Second fixed booking: tomorrow 10:00-11:00, Tanuj Sharma with Virat Kohli.
-       Same fx- treatment as above so it reaches already-saved workspaces too. */
-    const demoGuest = contacts.find((c) => c.id === 'c-8') || contacts[0];
-    records.meetings.push({
-      id: 'fx-virat-kohli-discovery',
-      title: 'Discovery session', type: 'Discovery',
-      date: daysFromNow(1), time: '10:00', duration: 60,
-      status: 'Confirmed', organizer: CURRENT_USER.name, organizerId: CURRENT_USER.teamId,
-      location: 'Video call', contactId: demoGuest.id,
-      participants: [
-        { name: CURRENT_USER.name, role: 'Internal', email: CURRENT_USER.email, attended: null },
-        { name: `${demoGuest.firstName} ${demoGuest.lastName}`, role: 'Customer', email: demoGuest.email, attended: null }
-      ],
-      agenda: ['Discovery session'],
-      summary: '', decisions: [], keyPoints: [],
-      sentiment: null, satisfaction: null, reminder: 15,
-      createdTs: Date.now(),
-      timeline: [{ ts: Date.now(), label: 'Meeting created' }]
-    });
-
-    /* re-sort: both fixtures are appended after the generated history was ordered */
+    /* re-sort: the fixture is appended after the generated history was ordered */
     records.meetings.sort(byDateAsc);
 
     return { contacts, records };
   }
 
   /** Bumped whenever seedContacts()/seedWorkspace() gain sample data a saved workspace should pick up. */
-  const SEED_VERSION = 18;
+  const SEED_VERSION = 19;
 
   function seedData() {
     const ws = seedWorkspace();
@@ -604,7 +584,7 @@
       migrateSeedData(saved, seedContactList, seedRecords);
       /* prune first: a fixture still pointing at a retired contact is dropped
          here and re-added from the fresh seed in the same load. */
-      const reconciled = pruneRetiredContacts() + mergeFixtures(seedRecords);
+      const reconciled = pruneRetiredContacts() + pruneRetiredFixtures() + mergeFixtures(seedRecords);
       if (reconciled) saveData();
       return true;
     } catch (err) {
@@ -663,6 +643,35 @@
     });
 
     if (retired.has(DB.activeContactId)) DB.activeContactId = (DB.contacts[0] || {}).id || null;
+    return removed;
+  }
+  /**
+   * Sample records dropped from seedWorkspace() after workspaces were already
+   * saved. mergeFixtures() re-adds any fx- record it finds in the seed, so an
+   * fx- fixture cannot be retired by deleting it from the seed alone: a
+   * workspace that already merged it would keep it forever. Listing the id here
+   * removes it instead, the fixture-level mirror of RETIRED_CONTACT_IDS.
+   */
+  const RETIRED_FIXTURE_IDS = ['fx-virat-kohli-discovery'];
+
+  /**
+   * Drops retired fx- fixtures from a saved workspace. Runs on every load rather
+   * than behind SEED_VERSION, so a workspace already stamped at the current
+   * version is still cleaned. Child records keyed by meetingId are left alone —
+   * the same choice deleteRecord() makes for a meeting deleted in the UI.
+   * Idempotent: removing what has already gone is a no-op.
+   */
+  function pruneRetiredFixtures() {
+    const retired = new Set(RETIRED_FIXTURE_IDS);
+    if (!retired.size) return 0;
+    let removed = 0;
+
+    Object.keys(DB.records).forEach((key) => {
+      const list = DB.records[key] || [];
+      const kept = list.filter((r) => !retired.has(r.id));
+      removed += list.length - kept.length;
+      DB.records[key] = kept;
+    });
     return removed;
   }
 
