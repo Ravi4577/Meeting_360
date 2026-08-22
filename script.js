@@ -268,24 +268,6 @@
         createdAt: '2025-11-02', updatedAt: todayISO()
       },
       {
-        id: 'c-4', firstName: 'Sidhart', lastName: 'Sharma', jobTitle: 'VP of Customer Success',
-        department: 'Customer Success', accountName: 'Meridian Retail Solutions',
-        email: 'sidhart.sharma@meridianretail.example', secondaryEmail: 's.sharma@meridian.example',
-        mobile: '+91 98735 21460', officePhone: '+91 124 456 7820', fax: '+91 124 456 7899',
-        street: '402, Cyber Greens, DLF Phase 3', city: 'Gurugram', state: 'HR', zip: '122002', country: 'India',
-        otherStreet: '7th Floor, Prestige Trade Tower, Palace Road', otherCity: 'Bengaluru',
-        otherState: 'KA', otherZip: '560001', otherCountry: 'India',
-        description: 'Owns post-sale adoption for the retail vertical. Requested a quarterly success review cadence.',
-        favourite: false, owner: CURRENT_USER.name, reportsTo: 'Anita Kulkarni (Chief Customer Officer)',
-        leadSource: 'Learning Saturday demo', industry: 'Retail & E-commerce',
-        employees: '3,600', annualRevenue: '₹640M', timezone: '(GMT+05:30) India',
-        language: 'English (IN)', linkedin: 'linkedin.com/in/sidhart-sharma',
-        lifecycle: 'Customer — Adoption', engagement: 61,
-        preferredSlot: 'Wed–Fri, 14:00–17:00 IST', doNotCall: false, emailOptOut: false,
-        tags: ['Retail', 'Success Review', 'Enterprise'],
-        createdAt: '2026-08-21', updatedAt: todayISO()
-      },
-      {
         id: 'c-5', firstName: 'Pranay', lastName: 'G', jobTitle: 'Director of Platform Engineering',
         department: 'Engineering', accountName: 'Nimbus Health Systems',
         email: 'pranay.g@nimbushealth.example', secondaryEmail: 'p.g@nimbus.example',
@@ -301,24 +283,6 @@
         lifecycle: 'Prospect — Security review', engagement: 47,
         preferredSlot: 'Mon & Thu, 10:00–13:00 IST', doNotCall: false, emailOptOut: false,
         tags: ['Healthcare', 'Security Review', 'Pilot'],
-        createdAt: '2026-08-21', updatedAt: todayISO()
-      },
-      {
-        id: 'c-6', firstName: 'Ravi', lastName: 'Maurya', jobTitle: 'Head of Procurement',
-        department: 'Procurement', accountName: 'Sundara Manufacturing Ltd',
-        email: 'ravi.maurya@sundaramfg.example', secondaryEmail: '',
-        mobile: '+91 88267 40913', officePhone: '+91 22 4972 6600', fax: '+91 22 4972 6699',
-        street: 'Plot 24, MIDC Industrial Area, Chakan', city: 'Pune', state: 'MH', zip: '410501', country: 'India',
-        otherStreet: 'Sundara House, 14 Barakhamba Road', otherCity: 'New Delhi',
-        otherState: 'DL', otherZip: '110001', otherCountry: 'India',
-        description: 'Owns the commercial paperwork for the plant rollout. Wants a three-year pricing lock before signature.',
-        favourite: false, owner: 'Maya Iqbal', reportsTo: 'Vikram Sundaram (Managing Director)',
-        leadSource: 'Outbound — Plant modernisation campaign', industry: 'Industrial Manufacturing',
-        employees: '7,800', annualRevenue: '₹2.4B', timezone: '(GMT+05:30) India',
-        language: 'English (IN)', linkedin: 'linkedin.com/in/ravi-maurya',
-        lifecycle: 'Prospect — Negotiation', engagement: 38,
-        preferredSlot: 'Tue & Fri, 11:00–13:00 IST', doNotCall: false, emailOptOut: false,
-        tags: ['Manufacturing', 'Procurement', 'Pricing'],
         createdAt: '2026-08-21', updatedAt: todayISO()
       },
       {
@@ -566,9 +530,9 @@
 
     records.meetings.sort(byDateAsc);
     /* A fixed booking, kept out of the random history so it is always present:
-       tomorrow 09:00-10:00, Tanuj Sharma with Sidhart Sharma. Ids prefixed fx-
+       tomorrow 09:00-10:00, Tanuj Sharma with Priya Raman. Ids prefixed fx-
        are merged into already-saved workspaces by migrateSeedData(). */
-    const host = contacts.find((c) => c.id === 'c-4') || contacts[0];
+    const host = contacts.find((c) => c.id === 'c-3') || contacts[0];
     records.meetings.push({
       id: 'fx-learning-session',
       title: 'Learning session', type: 'Onboarding',
@@ -593,7 +557,7 @@
   }
 
   /** Bumped whenever seedContacts()/seedWorkspace() gain sample data a saved workspace should pick up. */
-  const SEED_VERSION = 14;
+  const SEED_VERSION = 15;
 
   function seedData() {
     const ws = seedWorkspace();
@@ -653,7 +617,9 @@
       DB.settings.integrations = Object.assign(base.settings.integrations, (saved.settings || {}).integrations || {});
       DB.records = Object.assign(base.records, saved.records || {});
       migrateSeedData(saved, seedContactList, seedRecords);
-      const reconciled = mergeFixtures(seedRecords) + pruneRetiredContacts();
+      /* prune first: a fixture still pointing at a retired contact is dropped
+         here and re-added from the fresh seed in the same load. */
+      const reconciled = pruneRetiredContacts() + mergeFixtures(seedRecords);
       if (reconciled) saveData();
       return true;
     } catch (err) {
@@ -688,7 +654,7 @@
    * saved. Listed explicitly so a contact the user created is never mistaken for
    * a retired one — those carry generated uid('c') ids and cannot collide.
    */
-  const RETIRED_CONTACT_IDS = ['c-1', 'c-2'];
+  const RETIRED_CONTACT_IDS = ['c-1', 'c-2', 'c-4', 'c-6'];
 
   /**
    * Removes retired sample contacts and every record hanging off them. Runs on
