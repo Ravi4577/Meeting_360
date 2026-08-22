@@ -251,23 +251,6 @@
   function seedContacts() {
     return [
       {
-        id: 'c-3', firstName: 'Priya', lastName: 'Raman', jobTitle: 'Head of Data',
-        department: 'Data & Insights', accountName: 'Corvus Analytics',
-        email: 'priya.raman@corvus.example', secondaryEmail: '',
-        mobile: '(033) 512-8842', officePhone: '', fax: '',
-        street: '221 Kingsway', city: 'Bengaluru', state: 'KA', zip: '560001', country: 'India',
-        otherStreet: '', otherCity: '', otherState: '', otherZip: '', otherCountry: '',
-        description: 'Technical champion. Chairs the internal data model review board.',
-        favourite: true, owner: 'Maya Iqbal', reportsTo: 'CTO',
-        leadSource: 'Partner referral', industry: 'Software & Analytics',
-        employees: '1,150', annualRevenue: '₹95M', timezone: '(GMT+05:30) India',
-        language: 'English (IN)', linkedin: 'linkedin.com/in/priya-raman',
-        lifecycle: 'Customer — Onboarding', engagement: 66,
-        preferredSlot: 'Weekday mornings IST', doNotCall: false, emailOptOut: false,
-        tags: ['Champion', 'Expansion'],
-        createdAt: '2025-11-02', updatedAt: todayISO()
-      },
-      {
         id: 'c-5', firstName: 'Pranay', lastName: 'G', jobTitle: 'Director of Platform Engineering',
         department: 'Engineering', accountName: 'Nimbus Health Systems',
         email: 'pranay.g@nimbushealth.example', secondaryEmail: 'p.g@nimbus.example',
@@ -530,9 +513,9 @@
 
     records.meetings.sort(byDateAsc);
     /* A fixed booking, kept out of the random history so it is always present:
-       tomorrow 09:00-10:00, Tanuj Sharma with Priya Raman. Ids prefixed fx-
+       tomorrow 09:00-10:00, Tanuj Sharma with Pranay G. Ids prefixed fx-
        are merged into already-saved workspaces by migrateSeedData(). */
-    const host = contacts.find((c) => c.id === 'c-3') || contacts[0];
+    const host = contacts.find((c) => c.id === 'c-5') || contacts[0];
     records.meetings.push({
       id: 'fx-learning-session',
       title: 'Learning session', type: 'Onboarding',
@@ -557,7 +540,7 @@
   }
 
   /** Bumped whenever seedContacts()/seedWorkspace() gain sample data a saved workspace should pick up. */
-  const SEED_VERSION = 15;
+  const SEED_VERSION = 16;
 
   function seedData() {
     const ws = seedWorkspace();
@@ -574,7 +557,7 @@
         notify: { reminders: true, reschedules: true, actionItems: true, followUps: true, digest: false },
         integrations: { google: true, outlook: false, zoom: true, teams: false }
       },
-      activeContactId: 'c-3',
+      activeContactId: 'c-5',
       contacts: ws.contacts,
       records: ws.records,
       team: clone(TEAM),
@@ -654,7 +637,7 @@
    * saved. Listed explicitly so a contact the user created is never mistaken for
    * a retired one — those carry generated uid('c') ids and cannot collide.
    */
-  const RETIRED_CONTACT_IDS = ['c-1', 'c-2', 'c-4', 'c-6'];
+  const RETIRED_CONTACT_IDS = ['c-1', 'c-2', 'c-3', 'c-4', 'c-6'];
 
   /**
    * Removes retired sample contacts and every record hanging off them. Runs on
