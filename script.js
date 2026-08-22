@@ -515,14 +515,34 @@
       timeline: [{ ts: Date.now(), label: 'Meeting created' }]
     });
 
-    /* re-sort: the fixture is appended after the generated history was ordered */
+    /* Second fixed booking: tomorrow 10:00-11:00, Tanuj Sharma with Virat Kohli.
+       Same fx- treatment as above so it reaches already-saved workspaces too. */
+    const demoGuest = contacts.find((c) => c.id === 'c-8') || contacts[0];
+    records.meetings.push({
+      id: 'fx-virat-kohli-discovery',
+      title: 'Discovery session', type: 'Discovery',
+      date: daysFromNow(1), time: '10:00', duration: 60,
+      status: 'Confirmed', organizer: CURRENT_USER.name, organizerId: CURRENT_USER.teamId,
+      location: 'Video call', contactId: demoGuest.id,
+      participants: [
+        { name: CURRENT_USER.name, role: 'Internal', email: CURRENT_USER.email, attended: null },
+        { name: `${demoGuest.firstName} ${demoGuest.lastName}`, role: 'Customer', email: demoGuest.email, attended: null }
+      ],
+      agenda: ['Discovery session'],
+      summary: '', decisions: [], keyPoints: [],
+      sentiment: null, satisfaction: null, reminder: 15,
+      createdTs: Date.now(),
+      timeline: [{ ts: Date.now(), label: 'Meeting created' }]
+    });
+
+    /* re-sort: both fixtures are appended after the generated history was ordered */
     records.meetings.sort(byDateAsc);
 
     return { contacts, records };
   }
 
   /** Bumped whenever seedContacts()/seedWorkspace() gain sample data a saved workspace should pick up. */
-  const SEED_VERSION = 17;
+  const SEED_VERSION = 18;
 
   function seedData() {
     const ws = seedWorkspace();
