@@ -356,6 +356,24 @@
         preferredSlot: 'Weekday afternoons IST', doNotCall: false, emailOptOut: false,
         tags: ['Public Sector', 'Multi-region'],
         createdAt: '2026-08-22', updatedAt: todayISO()
+      },
+      {
+        id: 'c-13', firstName: 'Sidharth', lastName: 'Sharma', jobTitle: 'Head of Customer Success',
+        department: 'Customer Success', accountName: 'Larkspur Retail Group',
+        email: 'sidharth.sharma@larkspurretail.example', secondaryEmail: '',
+        mobile: '+91 98730 41562', officePhone: '+91 172 462 8800', fax: '',
+        street: '3rd Floor, Quark Atrium, IT Park', city: 'Chandigarh', state: 'CH', zip: '160101', country: 'India',
+        otherStreet: 'Tower B, Cyber Greens, Sector 21', otherCity: 'Noida',
+        otherState: 'UP', otherZip: '201301', otherCountry: 'India',
+        description: 'Owns the post-sale relationship for 40+ retail franchises. Wants meeting summaries pushed to his success team automatically.',
+        favourite: false, owner: 'Daniel Okafor', reportsTo: 'Kavita Rao (Chief Customer Officer)',
+        leadSource: 'Webinar — Retail operations', industry: 'Retail & E-commerce',
+        employees: '3,100', annualRevenue: '₹610M', timezone: '(GMT+05:30) India',
+        language: 'English (IN)', linkedin: 'linkedin.com/in/sidharth-sharma',
+        lifecycle: 'Customer — Adoption', engagement: 55,
+        preferredSlot: 'Wed & Fri, 14:00–17:00 IST', doNotCall: false, emailOptOut: false,
+        tags: ['Retail', 'Customer Success', 'Adoption'],
+        createdAt: '2026-08-22', updatedAt: todayISO()
       }
     ];
   }
@@ -522,7 +540,7 @@
   }
 
   /** Bumped whenever seedContacts()/seedWorkspace() gain sample data a saved workspace should pick up. */
-  const SEED_VERSION = 19;
+  const SEED_VERSION = 20;
 
   function seedData() {
     const ws = seedWorkspace();
