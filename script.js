@@ -269,24 +269,6 @@
         createdAt: '2026-08-21', updatedAt: todayISO()
       },
       {
-        id: 'c-7', firstName: 'Anjali', lastName: 'Verma', jobTitle: 'Chief Marketing Officer',
-        department: 'Marketing', accountName: 'Vidya Learning Networks',
-        email: 'anjali.verma@vidyalearning.example', secondaryEmail: 'a.verma@vidya.example',
-        mobile: '+91 97114 63028', officePhone: '+91 80 4171 9500', fax: '',
-        street: 'Tower B, Embassy Tech Village, Devarabeesanahalli', city: 'Bengaluru', state: 'KA', zip: '560103', country: 'India',
-        otherStreet: '3rd Floor, Rajapushpa Summit, Nanakramguda', otherCity: 'Hyderabad',
-        otherState: 'TS', otherZip: '500032', otherCountry: 'India',
-        description: 'Drove the campus pilot to 12,000 learners. Wants a co-marketing plan agreed before the national launch.',
-        favourite: true, owner: 'Sara Lindqvist', reportsTo: 'Nandita Rao (CEO)',
-        leadSource: 'Referral — Existing customer', industry: 'Education Technology',
-        employees: '1,900', annualRevenue: '₹420M', timezone: '(GMT+05:30) India',
-        language: 'English (IN)', linkedin: 'linkedin.com/in/anjali-verma',
-        lifecycle: 'Customer — Expansion', engagement: 72,
-        preferredSlot: 'Mon–Wed, 15:00–18:00 IST', doNotCall: false, emailOptOut: false,
-        tags: ['EdTech', 'Co-marketing', 'Expansion'],
-        createdAt: '2026-08-21', updatedAt: todayISO()
-      },
-      {
         id: 'c-8', firstName: 'Virat', lastName: 'Kohli', jobTitle: 'Director of Brand Partnerships',
         department: 'Brand & Sponsorships', accountName: 'Southbank Sports Media',
         email: 'virat.kohli@southbanksports.example', secondaryEmail: '',
@@ -540,7 +522,7 @@
   }
 
   /** Bumped whenever seedContacts()/seedWorkspace() gain sample data a saved workspace should pick up. */
-  const SEED_VERSION = 16;
+  const SEED_VERSION = 17;
 
   function seedData() {
     const ws = seedWorkspace();
@@ -637,7 +619,7 @@
    * saved. Listed explicitly so a contact the user created is never mistaken for
    * a retired one — those carry generated uid('c') ids and cannot collide.
    */
-  const RETIRED_CONTACT_IDS = ['c-1', 'c-2', 'c-3', 'c-4', 'c-6'];
+  const RETIRED_CONTACT_IDS = ['c-1', 'c-2', 'c-3', 'c-4', 'c-6', 'c-7'];
 
   /**
    * Removes retired sample contacts and every record hanging off them. Runs on
